@@ -1,4 +1,4 @@
-name: Resolve Nomic embedding accessor
+name: Verify Nomic row alignment
 
 on:
   push:
@@ -12,34 +12,35 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Resolve embedding accessor
+      - name: Verify metadata and vector row alignment
         shell: bash
         run: |
           set -euo pipefail
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
           python - <<'PY'
-          import inspect, os
+          import os, numpy as np
           from nomic import AtlasDataset, login
           login(os.environ['NOMIC_API_KEY'])
-          ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
-          ds._latest_dataset_state()
-          e=ds.maps[0].embeddings
-          cls=type(e)
-          print('CLASS',cls.__module__,cls.__name__)
-          for name in sorted(n for n in dir(e) if not n.startswith('__')):
-              try: static=inspect.getattr_static(cls,name)
-              except Exception: continue
-              if isinstance(static,property):
-                  try: source=inspect.getsource(static.fget)
-                  except Exception: source=''
-                  print('PROPERTY',name,source.replace('\n',' ')[:1500])
-              elif callable(static):
-                  try: signature=inspect.signature(static)
-                  except Exception: signature='?'
-                  print('METHOD',name,signature)
+          for identifier in [
+              'edwardbozzard/voynich-dinov3-words-20260713-v1',
+              'edwardbozzard/voynich-dinov3-proposals-50k-20260713-v1',
+          ]:
+              ds=AtlasDataset(identifier); ds._latest_dataset_state(); m=ds.maps[0]
+              data=m.data.df
+              projected=m.embeddings.projected
+              latent=np.asarray(m.embeddings.latent)
+              print('DATASET',identifier)
+              print('DATA',data.shape,list(data.columns),data.head(3).to_dict('records'))
+              print('PROJECTED',projected.shape,list(projected.columns),projected.head(3).to_dict('records'))
+              print('LATENT',latent.shape,latent.dtype,float(np.linalg.norm(latent[0])))
+              common=[c for c in data.columns if c in projected.columns]
+              print('COMMON',common)
+              for c in common:
+                  a=data[c].astype(str).to_numpy(); b=projected[c].astype(str).to_numpy()
+                  print('MATCH',c,bool(np.array_equal(a,b)),a[:3].tolist(),b[:3].tolist())
           PY
