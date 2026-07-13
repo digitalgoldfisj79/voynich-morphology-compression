@@ -1,4 +1,4 @@
-name: Test Nomic materialisation
+name: Resolve Nomic embedding accessor
 
 on:
   push:
@@ -12,42 +12,34 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Materialise metadata and embeddings
+      - name: Resolve embedding accessor
         shell: bash
         run: |
           set -euo pipefail
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
           python - <<'PY'
-          import inspect, os, numpy as np
+          import inspect, os
           from nomic import AtlasDataset, login
           login(os.environ['NOMIC_API_KEY'])
           ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
           ds._latest_dataset_state()
-          m=ds.maps[0]
-          df=m.data.df
-          print('DATA',type(df).__name__,df.shape,list(df.columns),df.head(2).to_dict('records'))
-          e=m.embeddings
-          print('EMBED_ACCESSOR',type(e).__module__,type(e).__name__,[n for n in dir(e) if not n.startswith('__')])
-          for candidate in ('array','np','numpy','embeddings','tb','df'):
-              if hasattr(e,candidate):
-                  try:
-                      value=getattr(e,candidate)
-                      print('CANDIDATE',candidate,type(value).__name__,getattr(value,'shape',None))
-                      if not callable(value):
-                          arr=np.asarray(value)
-                          print('ARRAY',candidate,arr.shape,arr.dtype,float(np.linalg.norm(arr[0])))
-                          break
-                  except Exception as ex:
-                      print('CANDIDATE_ERROR',candidate,type(ex).__name__,str(ex))
-          else:
-              try:
-                  arr=np.asarray(e)
-                  print('ARRAY_DIRECT',arr.shape,arr.dtype,repr(arr)[:1000])
-              except Exception as ex:
-                  print('ARRAY_DIRECT_ERROR',type(ex).__name__,str(ex))
+          e=ds.maps[0].embeddings
+          cls=type(e)
+          print('CLASS',cls.__module__,cls.__name__)
+          for name in sorted(n for n in dir(e) if not n.startswith('__')):
+              try: static=inspect.getattr_static(cls,name)
+              except Exception: continue
+              if isinstance(static,property):
+                  try: source=inspect.getsource(static.fget)
+                  except Exception: source=''
+                  print('PROPERTY',name,source.replace('\n',' ')[:1500])
+              elif callable(static):
+                  try: signature=inspect.signature(static)
+                  except Exception: signature='?'
+                  print('METHOD',name,signature)
           PY
