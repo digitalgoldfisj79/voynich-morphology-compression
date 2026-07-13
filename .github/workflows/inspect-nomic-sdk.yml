@@ -1,4 +1,4 @@
-name: Inspect Nomic lazy accessors
+name: Identify Nomic lazy accessor methods
 
 on:
   push:
@@ -12,11 +12,11 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Inspect lazy data and embedding accessors
+      - name: Identify materialisation methods
         shell: bash
         run: |
           set -euo pipefail
@@ -30,18 +30,27 @@ jobs:
           ds._latest_dataset_state()
           m=ds.maps[0]
           for label,obj in [('data',m.data),('embeddings',m.embeddings)]:
-              print('OBJECT',label,type(obj).__module__,type(obj).__name__)
-              print('DICT',repr(getattr(obj,'__dict__',{}))[:8000])
-              names=[n for n in dir(obj) if not n.startswith('__')]
-              print('DIR',names)
-              print('CLASS_SOURCE')
-              print(inspect.getsource(type(obj))[:25000])
-              for n in names:
-                  if any(k in n.lower() for k in ('df','table','arrow','download','get','load','embed','numpy','array','data')):
+              cls=type(obj)
+              print('OBJECT',label,cls.__module__,cls.__name__)
+              for name in sorted(n for n in dir(obj) if not n.startswith('__')):
+                  try:
+                      static=inspect.getattr_static(cls,name)
+                  except Exception:
+                      continue
+                  if isinstance(static,property):
                       try:
-                          static=inspect.getattr_static(type(obj),n)
-                          print('STATIC',n,type(static).__name__)
-                          if isinstance(static,property): print(inspect.getsource(static.fget)[:8000])
-                          elif callable(static): print('SIGNATURE',inspect.signature(static)); print(inspect.getsource(static)[:8000])
-                      except Exception as e: print('STATIC_ERROR',n,type(e).__name__,str(e))
+                          source=inspect.getsource(static.fget)
+                      except Exception:
+                          source=''
+                      print('PROPERTY',name,'SOURCE',source[:5000].replace('\n','\\n'))
+                  elif callable(static):
+                      try:
+                          signature=str(inspect.signature(static))
+                      except Exception:
+                          signature='?'
+                      try:
+                          source=inspect.getsource(static)
+                      except Exception:
+                          source=''
+                      print('METHOD',name,signature,'SOURCE',source[:5000].replace('\n','\\n'))
           PY
