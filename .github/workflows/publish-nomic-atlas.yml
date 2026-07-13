@@ -1,0 +1,73 @@
+name: Publish Voynich DINOv3 Atlas
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/nomic-atlas
+    paths:
+      - .github/workflows/publish-nomic-atlas.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+    steps:
+      - name: Require Nomic secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${NOMIC_API_KEY:-}" || {
+            echo "Repository secret NOMIC_API_KEY is not configured." >&2
+            exit 1
+          }
+
+      - name: Download validated Atlas bundles
+        uses: actions/download-artifact@v4
+        with:
+          name: vdino3-nomic-atlas-bundles
+          repository: digitalgoldfisj79/voynich-morphology-compression
+          run-id: 29277283414
+          github-token: ${{ github.token }}
+          path: artifact
+
+      - name: Verify and extract bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'dfba80552f1bb4db0e2c70dffd1b2e6be8e23cf09cb0089caee797dc2e54ef1d  artifact/vdino3-nomic-atlas-bundles.zip' | sha256sum --check
+          mkdir prepared
+          unzip -q artifact/vdino3-nomic-atlas-bundles.zip -d prepared
+          test -f prepared/vdino3-atlas/publish_to_nomic.py
+
+      - name: Install publisher dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install 'nomic==3.9.0' 'numpy>=1.26,<3'
+
+      - name: Publish private Atlas datasets
+        shell: bash
+        working-directory: prepared/vdino3-atlas
+        run: |
+          set -euo pipefail
+          python publish_to_nomic.py | tee nomic_publish.log
+          test -f nomic_publish_result.json
+
+      - name: Preserve publication report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vdino3-nomic-publication-report
+          path: |
+            prepared/vdino3-atlas/nomic_publish_result.json
+            prepared/vdino3-atlas/nomic_publish.log
+          if-no-files-found: warn
+          retention-days: 30
