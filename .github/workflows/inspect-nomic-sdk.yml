@@ -1,4 +1,4 @@
-name: Identify Nomic lazy accessor methods
+name: Test Nomic materialisation
 
 on:
   push:
@@ -12,45 +12,42 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Identify materialisation methods
+      - name: Materialise metadata and embeddings
         shell: bash
         run: |
           set -euo pipefail
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
           python - <<'PY'
-          import inspect, os
+          import inspect, os, numpy as np
           from nomic import AtlasDataset, login
           login(os.environ['NOMIC_API_KEY'])
           ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
           ds._latest_dataset_state()
           m=ds.maps[0]
-          for label,obj in [('data',m.data),('embeddings',m.embeddings)]:
-              cls=type(obj)
-              print('OBJECT',label,cls.__module__,cls.__name__)
-              for name in sorted(n for n in dir(obj) if not n.startswith('__')):
+          df=m.data.df
+          print('DATA',type(df).__name__,df.shape,list(df.columns),df.head(2).to_dict('records'))
+          e=m.embeddings
+          print('EMBED_ACCESSOR',type(e).__module__,type(e).__name__,[n for n in dir(e) if not n.startswith('__')])
+          for candidate in ('array','np','numpy','embeddings','tb','df'):
+              if hasattr(e,candidate):
                   try:
-                      static=inspect.getattr_static(cls,name)
-                  except Exception:
-                      continue
-                  if isinstance(static,property):
-                      try:
-                          source=inspect.getsource(static.fget)
-                      except Exception:
-                          source=''
-                      print('PROPERTY',name,'SOURCE',source[:5000].replace('\n','\\n'))
-                  elif callable(static):
-                      try:
-                          signature=str(inspect.signature(static))
-                      except Exception:
-                          signature='?'
-                      try:
-                          source=inspect.getsource(static)
-                      except Exception:
-                          source=''
-                      print('METHOD',name,signature,'SOURCE',source[:5000].replace('\n','\\n'))
+                      value=getattr(e,candidate)
+                      print('CANDIDATE',candidate,type(value).__name__,getattr(value,'shape',None))
+                      if not callable(value):
+                          arr=np.asarray(value)
+                          print('ARRAY',candidate,arr.shape,arr.dtype,float(np.linalg.norm(arr[0])))
+                          break
+                  except Exception as ex:
+                      print('CANDIDATE_ERROR',candidate,type(ex).__name__,str(ex))
+          else:
+              try:
+                  arr=np.asarray(e)
+                  print('ARRAY_DIRECT',arr.shape,arr.dtype,repr(arr)[:1000])
+              except Exception as ex:
+                  print('ARRAY_DIRECT_ERROR',type(ex).__name__,str(ex))
           PY
