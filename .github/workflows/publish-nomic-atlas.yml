@@ -2,6 +2,11 @@ name: Publish Voynich DINOv3 Atlas
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat/nomic-atlas
+    paths:
+      - .github/workflows/publish-nomic-atlas.yml
 
 permissions:
   contents: read
@@ -42,6 +47,22 @@ jobs:
           unzip -q artifact/vdino3-nomic-atlas-bundles.zip -d prepared
           test -f prepared/vdino3-atlas/publish_to_nomic.py
 
+      - name: Set explicit public visibility
+        shell: bash
+        working-directory: prepared/vdino3-atlas
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('publish_to_nomic.py')
+          text = path.read_text(encoding='utf-8')
+          old = 'is_public=False'
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected exactly one {old!r}; found {text.count(old)}')
+          path.write_text(text.replace(old, 'is_public=True'), encoding='utf-8')
+          print('Publisher visibility set to public')
+          PY
+
       - name: Install publisher dependencies
         shell: bash
         run: |
@@ -49,7 +70,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install 'nomic==3.9.0' 'numpy>=1.26,<3'
 
-      - name: Publish private Atlas datasets
+      - name: Publish public Atlas datasets
         shell: bash
         working-directory: prepared/vdino3-atlas
         run: |
