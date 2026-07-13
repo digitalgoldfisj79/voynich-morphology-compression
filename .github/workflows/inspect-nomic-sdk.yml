@@ -1,4 +1,4 @@
-name: Inspect Nomic SDK authenticated export
+name: Inspect Nomic map export
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Inspect export surface
+      - name: Inspect map object and export methods
         shell: bash
         run: |
           set -euo pipefail
@@ -26,20 +26,23 @@ jobs:
           import inspect, os
           from nomic import AtlasDataset, login
           login(os.environ['NOMIC_API_KEY'])
-          for name in ['get_data','add_data','_add_embeddings','get_map']:
-              obj=getattr(AtlasDataset,name)
-              print('SIGNATURE',name,inspect.signature(obj))
-              print('SOURCE',name)
-              print(inspect.getsource(obj)[:12000])
           ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
           ds._latest_dataset_state()
-          print('TOTAL',ds.total_datums)
-          print('FIELDS',ds.dataset_fields)
-          try:
-              sample=ds.get_data(limit=5)
-          except TypeError:
-              sample=ds.get_data()
-          print('SAMPLE_TYPE',type(sample).__name__)
-          print('SAMPLE_REPR',repr(sample)[:8000])
-          print('PROJECTIONS',[(getattr(p,'id',None),getattr(p,'name',None),getattr(p,'_status',None)) for p in ds.projections])
+          print('DATASET_DICT',repr(ds.__dict__)[:12000])
+          print('MAPS_TYPE',type(ds.maps).__name__,len(ds.maps))
+          m=ds.maps[0]
+          print('MAP_TYPE',type(m),type(m).__module__,type(m).__name__)
+          print('MAP_DICT',repr(getattr(m,'__dict__',{}))[:12000])
+          print('MAP_DIR',[n for n in dir(m) if any(k in n.lower() for k in ('data','embed','download','arrow','coord','neighbor','id'))])
+          print('MAP_CLASS_SOURCE')
+          print(inspect.getsource(type(m))[:30000])
+          print('GET_MAP_SOURCE')
+          print(inspect.getsource(AtlasDataset.get_map)[:20000])
+          for n in dir(m):
+              if any(k in n.lower() for k in ('data','embed','download','arrow','coord','neighbor')):
+                  try:
+                      v=getattr(m,n)
+                      print('ATTR',n,type(v).__name__,repr(v)[:5000])
+                  except Exception as e:
+                      print('ATTR_ERROR',n,type(e).__name__,str(e))
           PY
