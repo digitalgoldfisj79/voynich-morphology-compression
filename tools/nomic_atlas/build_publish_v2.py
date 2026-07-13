@@ -87,6 +87,9 @@ def load_map(identifier: str) -> tuple[pd.DataFrame, np.ndarray]:
         projected.atlas_id.astype(str).to_numpy(),
     ):
         raise RuntimeError(f"{identifier}: alignment failed")
+    for column in aligned.columns:
+        if isinstance(aligned[column].dtype, pd.CategoricalDtype):
+            aligned[column] = aligned[column].astype("string").fillna("").astype(str)
     checkpoint("map_loaded", identifier=identifier, rows=len(aligned), dimensions=vectors.shape[1])
     return aligned, normalise(vectors)
 
