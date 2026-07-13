@@ -1,4 +1,4 @@
-name: Inspect Nomic SDK public export
+name: Inspect Nomic SDK authenticated export
 
 on:
   push:
@@ -13,34 +13,33 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Inspect SDK and public dataset
+      - name: Inspect export surface
         shell: bash
         run: |
           set -euo pipefail
+          test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
           python - <<'PY'
-          import inspect, json
-          from nomic import AtlasDataset
-          names=[n for n in dir(AtlasDataset) if any(k in n.lower() for k in ('data','embed','download','arrow','map','projection'))]
-          print('CLASS_METHODS', names)
-          for n in names:
-              obj=getattr(AtlasDataset,n,None)
-              if callable(obj):
-                  try:
-                      print('\nSOURCE',n)
-                      print(inspect.getsource(obj)[:6000])
-                  except Exception as e:
-                      print('NO_SOURCE',n,type(e).__name__,str(e))
+          import inspect, os
+          from nomic import AtlasDataset, login
+          login(os.environ['NOMIC_API_KEY'])
+          for name in ['get_data','add_data','_add_embeddings','get_map']:
+              obj=getattr(AtlasDataset,name)
+              print('SIGNATURE',name,inspect.signature(obj))
+              print('SOURCE',name)
+              print(inspect.getsource(obj)[:12000])
           ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
           ds._latest_dataset_state()
-          print('\nINSTANCE_DICT_KEYS', sorted(ds.__dict__.keys()))
           print('TOTAL',ds.total_datums)
-          for n in sorted(dir(ds)):
-              if any(k in n.lower() for k in ('data','embed','download','arrow','map','projection')):
-                  try:
-                      v=getattr(ds,n)
-                      print('INSTANCE',n,type(v).__name__,repr(v)[:1000])
-                  except Exception as e:
-                      print('INSTANCE_ERROR',n,type(e).__name__,str(e))
+          print('FIELDS',ds.dataset_fields)
+          try:
+              sample=ds.get_data(limit=5)
+          except TypeError:
+              sample=ds.get_data()
+          print('SAMPLE_TYPE',type(sample).__name__)
+          print('SAMPLE_REPR',repr(sample)[:8000])
+          print('PROJECTIONS',[(getattr(p,'id',None),getattr(p,'name',None),getattr(p,'_status',None)) for p in ds.projections])
           PY
