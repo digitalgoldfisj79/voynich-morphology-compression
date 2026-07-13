@@ -7,6 +7,12 @@ on:
       - feat/nomic-atlas
     paths:
       - .github/workflows/publish-nomic-atlas.yml
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+      - reopened
 
 permissions:
   contents: read
@@ -71,5 +77,3 @@ jobs:
             prepared/vdino3-atlas/nomic_publish.log
           if-no-files-found: warn
           retention-days: 30
-
-# Triggered after repository secret configuration.
