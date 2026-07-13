@@ -1,0 +1,46 @@
+name: Inspect Nomic SDK public export
+
+on:
+  push:
+    branches: [feat/nomic-atlas]
+    paths: [.github/workflows/inspect-nomic-sdk.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect SDK and public dataset
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
+          python - <<'PY'
+          import inspect, json
+          from nomic import AtlasDataset
+          names=[n for n in dir(AtlasDataset) if any(k in n.lower() for k in ('data','embed','download','arrow','map','projection'))]
+          print('CLASS_METHODS', names)
+          for n in names:
+              obj=getattr(AtlasDataset,n,None)
+              if callable(obj):
+                  try:
+                      print('\nSOURCE',n)
+                      print(inspect.getsource(obj)[:6000])
+                  except Exception as e:
+                      print('NO_SOURCE',n,type(e).__name__,str(e))
+          ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
+          ds._latest_dataset_state()
+          print('\nINSTANCE_DICT_KEYS', sorted(ds.__dict__.keys()))
+          print('TOTAL',ds.total_datums)
+          for n in sorted(dir(ds)):
+              if any(k in n.lower() for k in ('data','embed','download','arrow','map','projection')):
+                  try:
+                      v=getattr(ds,n)
+                      print('INSTANCE',n,type(v).__name__,repr(v)[:1000])
+                  except Exception as e:
+                      print('INSTANCE_ERROR',n,type(e).__name__,str(e))
+          PY
