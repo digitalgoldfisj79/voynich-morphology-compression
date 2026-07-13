@@ -1,4 +1,4 @@
-name: Verify Nomic row alignment
+name: Verify Nomic row alignment quietly
 
 on:
   push:
@@ -23,24 +23,23 @@ jobs:
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
           python - <<'PY'
-          import os, numpy as np
+          import contextlib, io, os, numpy as np
           from nomic import AtlasDataset, login
           login(os.environ['NOMIC_API_KEY'])
+          results=[]
           for identifier in [
               'edwardbozzard/voynich-dinov3-words-20260713-v1',
               'edwardbozzard/voynich-dinov3-proposals-50k-20260713-v1',
           ]:
-              ds=AtlasDataset(identifier); ds._latest_dataset_state(); m=ds.maps[0]
-              data=m.data.df
-              projected=m.embeddings.projected
-              latent=np.asarray(m.embeddings.latent)
-              print('DATASET',identifier)
-              print('DATA',data.shape,list(data.columns),data.head(3).to_dict('records'))
-              print('PROJECTED',projected.shape,list(projected.columns),projected.head(3).to_dict('records'))
-              print('LATENT',latent.shape,latent.dtype,float(np.linalg.norm(latent[0])))
+              noise=io.StringIO()
+              with contextlib.redirect_stdout(noise), contextlib.redirect_stderr(noise):
+                  ds=AtlasDataset(identifier); ds._latest_dataset_state(); m=ds.maps[0]
+                  data=m.data.df
+                  projected=m.embeddings.projected
+                  latent=np.asarray(m.embeddings.latent)
               common=[c for c in data.columns if c in projected.columns]
-              print('COMMON',common)
-              for c in common:
-                  a=data[c].astype(str).to_numpy(); b=projected[c].astype(str).to_numpy()
-                  print('MATCH',c,bool(np.array_equal(a,b)),a[:3].tolist(),b[:3].tolist())
+              matches={c: bool(np.array_equal(data[c].astype(str).to_numpy(), projected[c].astype(str).to_numpy())) for c in common}
+              results.append((identifier,data.shape,projected.shape,latent.shape,str(latent.dtype),common,matches,data.head(2).to_dict('records'),projected.head(2).to_dict('records')))
+          for result in results:
+              print('ALIGNMENT',repr(result))
           PY
