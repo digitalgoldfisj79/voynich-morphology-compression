@@ -141,14 +141,63 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python tools/nomic_atlas/voynich_atlas.py publish \
-            --bundle-dir extracted/voynich_atlas_v2/proposal_bundle \
-            --dataset "$PROPOSAL_DATASET" \
-            --index-name voynich-dinov3-proposal-map-enriched-100k-v2 \
-            --description 'Enriched Voynich DINOv3 proposal map: deterministic 100,000-row sample, 32-cluster diagnostics, medoid distance, held-out EVA transfer, hand, Currier and section metadata.' \
-            --public \
-            --wait-seconds 3600 \
-            2>&1 | tee nomic-proposal-100k-publish.log
+          python - <<'PY'
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          identifier = os.environ['PROPOSAL_DATASET']
+          organization, slug = identifier.split('/', 1)
+          url = f'https://api-atlas.nomic.ai/v1/project/{organization}/{slug}'
+          marker = Path('reuse-ready-project')
+          result_path = Path('extracted/voynich_atlas_v2/proposal_bundle/atlas_publish_result.json')
+          try:
+              with urllib.request.urlopen(url, timeout=60) as response:
+                  project = json.load(response)
+          except urllib.error.HTTPError as error:
+              if error.code == 404:
+                  raise SystemExit(0)
+              raise
+          rows = int(project['total_datums_in_project'])
+          ready = [
+              projection
+              for index in project.get('atlas_indices', [])
+              for projection in index.get('projections', [])
+              if projection.get('ready') is True
+          ]
+          if rows != 100000:
+              raise SystemExit(f'{identifier}: existing project has {rows} rows, expected 100000; refusing mutation')
+          if not ready:
+              raise SystemExit(0)
+          result = {
+              'dataset': identifier,
+              'rows_uploaded': 0,
+              'total_rows': rows,
+              'dataset_link': f'https://atlas.nomic.ai/data/{identifier}',
+              'map_link': f'https://atlas.nomic.ai/data/{identifier}/map',
+              'index_status': 'Completed',
+              'public': True,
+              'reused_exact_ready_project': True,
+              'ready_projection_count': len(ready),
+          }
+          result_path.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
+          marker.write_text('ready\n', encoding='utf-8')
+          print(json.dumps(result, indent=2))
+          PY
+          if [ -f reuse-ready-project ]; then
+            cp extracted/voynich_atlas_v2/proposal_bundle/atlas_publish_result.json nomic-proposal-100k-publish.log
+          else
+            python tools/nomic_atlas/voynich_atlas.py publish \
+              --bundle-dir extracted/voynich_atlas_v2/proposal_bundle \
+              --dataset "$PROPOSAL_DATASET" \
+              --index-name voynich-dinov3-proposal-map-enriched-100k-v2 \
+              --description 'Enriched Voynich DINOv3 proposal map: deterministic 100,000-row sample, 32-cluster diagnostics, medoid distance, held-out EVA transfer, hand, Currier and section metadata.' \
+              --public \
+              --wait-seconds 900 \
+              2>&1 | tee nomic-proposal-100k-publish.log
+          fi
 
       - name: Verify public enriched maps
         shell: bash
