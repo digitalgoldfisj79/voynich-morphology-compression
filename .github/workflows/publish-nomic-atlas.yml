@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 120
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+      PYTHONUNBUFFERED: "1"
     steps:
       - name: Require Nomic secret
         shell: bash
@@ -63,9 +64,10 @@ jobs:
         shell: bash
         working-directory: prepared/vdino3-atlas
         run: |
-          set -euo pipefail
-          python publish_to_nomic.py | tee nomic_publish.log
-          test -f nomic_publish_result.json
+          set +e
+          python publish_to_nomic.py 2>&1 | tee nomic_publish.log
+          status=${PIPESTATUS[0]}
+          exit "$status"
 
       - name: Preserve publication report
         if: always()
