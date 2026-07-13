@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: publish-voynich-atlas-v2-100k
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   publish:
@@ -38,8 +38,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 10 --retry-all-errors \
-            --output voynich-atlas-enriched-v2.zip \
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq aria2
+          aria2c \
+            --allow-overwrite=true \
+            --auto-file-renaming=false \
+            --file-allocation=none \
+            --max-connection-per-server=16 \
+            --split=16 \
+            --min-split-size=4M \
+            --retry-wait=2 \
+            --max-tries=20 \
+            --dir=. \
+            --out=voynich-atlas-enriched-v2.zip \
             "$ARCHIVE_URL"
           echo "$ARCHIVE_SHA256  voynich-atlas-enriched-v2.zip" | sha256sum --check
           unzip -t voynich-atlas-enriched-v2.zip
