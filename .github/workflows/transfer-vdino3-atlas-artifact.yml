@@ -6,6 +6,13 @@ on:
       - feat/nomic-atlas
     paths:
       - .github/workflows/transfer-vdino3-atlas-artifact.yml
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
   workflow_dispatch:
 
 permissions:
