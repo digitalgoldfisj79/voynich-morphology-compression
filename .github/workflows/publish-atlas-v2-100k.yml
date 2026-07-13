@@ -21,6 +21,7 @@ jobs:
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
       ARCHIVE_URL: https://litter.catbox.moe/o2i4rp.zip
+      ARCHIVE_BYTES: '376515197'
       ARCHIVE_SHA256: 8f4c529abf8aca2de7ec0a1c55cc5f05b3b5805e97de6614ed8f961c9ceabd15
       PROPOSAL_DATASET: edwardbozzard/voynich-dinov3-proposals-100k-enriched-20260713-v2
     steps:
@@ -38,20 +39,76 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq aria2
-          aria2c \
-            --allow-overwrite=true \
-            --auto-file-renaming=false \
-            --file-allocation=none \
-            --max-connection-per-server=16 \
-            --split=16 \
-            --min-split-size=4M \
-            --retry-wait=2 \
-            --max-tries=20 \
-            --dir=. \
-            --out=voynich-atlas-enriched-v2.zip \
-            "$ARCHIVE_URL"
+          python - <<'PY'
+          import concurrent.futures
+          import os
+          import time
+          import urllib.request
+          from pathlib import Path
+
+          url = os.environ['ARCHIVE_URL']
+          size = int(os.environ['ARCHIVE_BYTES'])
+          parts = 16
+          workers = 8
+          chunk = (size + parts - 1) // parts
+          part_dir = Path('archive-parts')
+          part_dir.mkdir(exist_ok=True)
+
+          def download_part(index: int) -> Path:
+              start = index * chunk
+              end = min(size - 1, start + chunk - 1)
+              expected = end - start + 1
+              path = part_dir / f'part-{index:02d}'
+              for attempt in range(1, 11):
+                  try:
+                      request = urllib.request.Request(
+                          url,
+                          headers={
+                              'Range': f'bytes={start}-{end}',
+                              'User-Agent': 'voynich-atlas-transfer/2',
+                          },
+                      )
+                      with urllib.request.urlopen(request, timeout=600) as response, path.open('wb') as output:
+                          if response.status != 206:
+                              raise RuntimeError(f'part {index}: HTTP {response.status}, expected 206')
+                          content_range = response.headers.get('Content-Range', '')
+                          expected_range = f'bytes {start}-{end}/{size}'
+                          if content_range != expected_range:
+                              raise RuntimeError(f'part {index}: {content_range!r} != {expected_range!r}')
+                          while True:
+                              block = response.read(1024 * 1024)
+                              if not block:
+                                  break
+                              output.write(block)
+                      actual = path.stat().st_size
+                      if actual != expected:
+                          raise RuntimeError(f'part {index}: {actual} bytes, expected {expected}')
+                      print(f'part {index:02d}: {actual} bytes', flush=True)
+                      return path
+                  except Exception as error:
+                      path.unlink(missing_ok=True)
+                      if attempt == 10:
+                          raise
+                      print(f'part {index:02d} attempt {attempt} failed: {error}', flush=True)
+                      time.sleep(min(30, 2 * attempt))
+              raise AssertionError('unreachable')
+
+          with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+              paths = list(executor.map(download_part, range(parts)))
+
+          target = Path('voynich-atlas-enriched-v2.zip')
+          with target.open('wb') as output:
+              for path in paths:
+                  with path.open('rb') as source:
+                      while True:
+                          block = source.read(1024 * 1024)
+                          if not block:
+                              break
+                          output.write(block)
+          if target.stat().st_size != size:
+              raise SystemExit(f'reassembled archive is {target.stat().st_size} bytes, expected {size}')
+          print(f'reassembled {target}: {target.stat().st_size} bytes', flush=True)
+          PY
           echo "$ARCHIVE_SHA256  voynich-atlas-enriched-v2.zip" | sha256sum --check
           unzip -t voynich-atlas-enriched-v2.zip
           rm -rf extracted
