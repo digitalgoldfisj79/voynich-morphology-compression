@@ -18,10 +18,9 @@ old = '''replacement = \'\'\'    accepted=[f for f in folios if f in selected an
     if os.getenv("REGISTRATION_ONLY") == "1":'''
 
 new = '''replacement = \'\'\'    # Two sparse foldout subpanels require an evidence-combination rule rather
-    # than the ordinary >=50-inlier gate.  These adjudications were computed by
-    # deterministic diagnostic job 6a54a71be4a4e82c0b590faf.  They are accepted
-    # only when this run reproduces the correct exact canvas and the stated
-    # feature-support conditions; no ordinary folio can enter this path.
+    # than the ordinary >=50-inlier gate. These adjudications were computed by
+    # deterministic diagnostic job 6a54a71be4a4e82c0b590faf. They are accepted
+    # only when this run reproduces the exact canvas and feature support.
     foldout_validations={
         "f72r3":{"candidate_index":129,"candidate_label":"71v and 72r","quad_iou_median":0.9803,"quad_iou_min":0.9111,"word_box_count":169,"ink_alignment_z":4.697,"ink_control_percentile":1.0,"min_inliers":20,"min_ratio":0.60,"max_median_reprojection_px":1.5},
         "f89v2":{"candidate_index":162,"candidate_label":"89v (part)","quad_iou_median":0.9953,"quad_iou_min":0.9838,"word_box_count":175,"ink_alignment_z":3.116,"ink_control_percentile":1.0,"min_inliers":500,"min_ratio":0.45,"max_median_reprojection_px":2.5}
@@ -45,6 +44,8 @@ if old not in s:
     raise RuntimeError("run_v4 registration replacement anchor not found")
 s = s.replace(old, new, 1)
 
-patched_wrapper = Path('/tmp/voynich_run_v5_inner.py')
+# Keep the modified wrapper beside full_pipeline.py so run_v4's relative-path
+# lookup remains valid.
+patched_wrapper = Path(__file__).with_name("_run_v5_inner.py")
 patched_wrapper.write_text(s)
 raise SystemExit(subprocess.call([sys.executable, str(patched_wrapper), *sys.argv[1:]]))
