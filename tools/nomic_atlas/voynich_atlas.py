@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,7 @@ META_NAMES = {
     "word": ("word_metadata.jsonl", "words.jsonl", "word_index.jsonl", "mapped_words.jsonl"),
     "proposal": ("proposal_metadata.jsonl", "proposals.jsonl", "proposal_index.jsonl"),
 }
+TERMINAL_INDEX_FAILURES = {"Failed", "Error", "Cancelled", "Canceled"}
 
 
 def fail(message: str) -> None:
@@ -40,7 +42,10 @@ def field(name: Any) -> str:
 def scalar(value: Any) -> Any:
     if isinstance(value, np.generic):
         value = value.item()
-    if value is None or isinstance(value, (str, int, float, bool)):
+    # Atlas 3.9 rejects Boolean Arrow columns; encode flags as 0/1 integers.
+    if isinstance(value, bool):
+        return int(value)
+    if value is None or isinstance(value, (str, int, float)):
         return value
     if isinstance(value, bytes):
         return value.decode("utf-8", "replace")
@@ -156,7 +161,7 @@ def prepare(args: argparse.Namespace) -> None:
         vectors /= norms[:, None]
     prepared_rows = []
     for source_row in indices.tolist():
-        row = dict(rows[source_row])
+        row = {name: scalar(value) for name, value in rows[source_row].items()}
         payload = f"{args.run_id}|{args.level}|{source_row}".encode()
         row.update({
             "atlas_id": f"{args.level}-{hashlib.sha256(payload).hexdigest()[:24]}",
@@ -211,11 +216,45 @@ def bundle(path: Path):
     emb_path = path / manifest["prepared"]["embeddings_file"]
     if sha256(meta_path) != manifest["integrity"]["metadata_sha256"] or sha256(emb_path) != manifest["integrity"]["embeddings_sha256"]:
         fail("Prepared bundle SHA-256 mismatch")
-    rows = read_metadata(meta_path)
-    vectors = np.load(emb_path, allow_pickle=False)
+    rows = [{name: scalar(value) for name, value in row.items()} for row in read_metadata(meta_path)]
+    vectors = np.asarray(np.load(emb_path, allow_pickle=False), dtype=np.float32)
+    if type(vectors) is not np.ndarray:
+        fail(f"Nomic requires an exact numpy.ndarray; got {type(vectors)!r}")
     if len(rows) != len(vectors) or len({r.get("atlas_id") for r in rows}) != len(rows):
         fail("Prepared metadata/embedding alignment or atlas_id uniqueness failure")
     return manifest, rows, vectors
+
+
+def projection_status(projection) -> str | None:
+    if projection is None:
+        return None
+    try:
+        return projection._status.get("index_build_stage")
+    except Exception:
+        return None
+
+
+def select_projection(dataset):
+    projections = dataset.projections
+    if not projections:
+        return None
+    completed = [projection for projection in projections if projection_status(projection) == "Completed"]
+    return completed[-1] if completed else projections[-1]
+
+
+def wait_for_projection(dataset, wait_seconds: int):
+    deadline = time.monotonic() + max(0, wait_seconds)
+    projection = select_projection(dataset)
+    while projection is not None and time.monotonic() < deadline:
+        stage = projection_status(projection)
+        if stage == "Completed":
+            return projection, stage
+        if stage in TERMINAL_INDEX_FAILURES:
+            fail(f"Atlas index entered terminal state {stage}")
+        time.sleep(min(15, max(1, int(deadline - time.monotonic()))))
+        dataset._latest_dataset_state()
+        projection = select_projection(dataset)
+    return projection, projection_status(projection)
 
 
 def publish(args: argparse.Namespace) -> None:
@@ -224,20 +263,58 @@ def publish(args: argparse.Namespace) -> None:
         fail("NOMIC_API_KEY is not set")
     manifest, rows, vectors = bundle(args.bundle_dir)
     from nomic import AtlasDataset, login
+
     login(token)
-    dataset = AtlasDataset(args.dataset, description=args.description, unique_id_field="atlas_id", is_public=args.public)
-    if dataset.total_datums and not args.allow_nonempty:
-        fail(f"{dataset.identifier} already contains {dataset.total_datums:,} rows; refusing to append")
-    dataset.add_data(data=rows, embeddings=vectors)
-    projection = dataset.create_index(
-        name=args.index_name, modality="embedding", topic_model=False, duplicate_detection=False
+    dataset = AtlasDataset(
+        args.dataset,
+        description=args.description,
+        unique_id_field="atlas_id",
+        is_public=args.public,
     )
+    dataset._latest_dataset_state()
+    existing_rows = int(dataset.total_datums)
+    uploaded_rows = 0
+
+    if existing_rows == 0:
+        dataset.add_data(data=rows, embeddings=vectors)
+        uploaded_rows = len(rows)
+    elif existing_rows == len(rows):
+        print(f"{dataset.identifier} already contains the expected {existing_rows:,} rows; reusing them")
+    elif not args.allow_nonempty:
+        fail(
+            f"{dataset.identifier} contains {existing_rows:,} rows but this bundle contains {len(rows):,}; "
+            "refusing to append"
+        )
+    else:
+        dataset.add_data(data=rows, embeddings=vectors)
+        uploaded_rows = len(rows)
+
+    dataset._latest_dataset_state()
+    projection = select_projection(dataset)
+    if projection is None:
+        projection = dataset.create_index(
+            name=args.index_name,
+            modality="embedding",
+            topic_model=False,
+            duplicate_detection=False,
+        )
+    projection, index_stage = wait_for_projection(dataset, args.wait_seconds)
+
+    dataset_link = f"{dataset.web_path}/data/{dataset.meta['organization_slug']}/{dataset.meta['slug']}"
     result = {
-        "dataset": dataset.identifier, "rows_uploaded": len(rows),
-        "dataset_link": getattr(projection, "dataset_link", None),
-        "map_link": getattr(projection, "map_link", None), "source_manifest": manifest,
+        "dataset": dataset.identifier,
+        "rows_uploaded": uploaded_rows,
+        "total_rows": int(dataset.total_datums),
+        "dataset_link": dataset_link,
+        "map_link": getattr(projection, "map_link", None),
+        "index_status": index_stage,
+        "public": bool(args.public),
+        "source_manifest": manifest,
     }
-    (args.bundle_dir / "atlas_publish_result.json").write_text(json.dumps(result, indent=2, default=str) + "\n")
+    (args.bundle_dir / "atlas_publish_result.json").write_text(
+        json.dumps(result, indent=2, default=str) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps(result, indent=2, default=str))
 
 
@@ -263,6 +340,7 @@ def main() -> None:
     pub.add_argument("--description", default="Voynich DINOv3 embedding map with provenance metadata")
     pub.add_argument("--public", action="store_true")
     pub.add_argument("--allow-nonempty", action="store_true")
+    pub.add_argument("--wait-seconds", type=int, default=300)
     args = parser.parse_args()
     prepare(args) if args.command == "prepare" else publish(args)
 
