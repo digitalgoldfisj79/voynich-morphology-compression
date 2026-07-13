@@ -55,12 +55,19 @@ jobs:
         run: python -m py_compile tools/nomic_atlas/build_publish_v2.py
 
       - name: Build enriched datasets and publish public maps
+        id: build
         shell: bash
         run: |
-          set -euo pipefail
-          python tools/nomic_atlas/build_publish_v2.py 2>&1 | tee atlas-v2-build.log
+          set +e
+          python tools/nomic_atlas/build_publish_v2.py > atlas-v2-build.log 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          echo '--- BUILD LOG TAIL ---'
+          tail -n 160 atlas-v2-build.log || true
+          exit 0
 
       - name: Validate output archive
+        if: steps.build.outputs.exit_code == '0'
         shell: bash
         run: |
           set -euo pipefail
@@ -81,14 +88,23 @@ jobs:
           print(json.dumps(summary, indent=2))
           PY
 
-      - name: Upload Atlas v2 deliverables
+      - name: Upload Atlas v2 diagnostics and deliverables
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: voynich-atlas-enriched-v2
+          name: voynich-atlas-enriched-v2-${{ github.run_id }}
           path: |
             voynich-atlas-enriched-v2.zip
             voynich-atlas-enriched-v2.zip.sha256
             atlas_v2_output/SUMMARY.json
             atlas-v2-build.log
+          if-no-files-found: warn
           compression-level: 0
           retention-days: 90
+
+      - name: Fail if build failed
+        if: steps.build.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          echo "Atlas v2 build failed with exit code ${{ steps.build.outputs.exit_code }}"
+          exit 1
