@@ -1,221 +1,50 @@
-name: Publish Voynich DINOv3 Atlas
+name: Verify Voynich DINOv3 Atlas
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    types:
-      - synchronize
-      - reopened
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    env:
-      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
-      PYTHONUNBUFFERED: "1"
+    timeout-minutes: 10
     steps:
-      - name: Require Nomic secret
+      - name: Verify public Atlas datasets
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${NOMIC_API_KEY:-}" || {
-            echo "Repository secret NOMIC_API_KEY is not configured." >&2
-            exit 1
-          }
-
-      - name: Download validated Atlas bundles
-        uses: actions/download-artifact@v4
-        with:
-          name: vdino3-nomic-atlas-bundles
-          repository: digitalgoldfisj79/voynich-morphology-compression
-          run-id: 29277283414
-          github-token: ${{ github.token }}
-          path: artifact
-
-      - name: Verify and extract bundles
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo 'dfba80552f1bb4db0e2c70dffd1b2e6be8e23cf09cb0089caee797dc2e54ef1d  artifact/vdino3-nomic-atlas-bundles.zip' | sha256sum --check
-          mkdir prepared
-          unzip -q artifact/vdino3-nomic-atlas-bundles.zip -d prepared
-          test -f prepared/vdino3-atlas/publish_to_nomic.py
-
-      - name: Install publisher dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install 'nomic==3.9.0' 'numpy>=1.26,<3'
-
-      - name: Install idempotent public publisher
-        shell: bash
-        working-directory: prepared/vdino3-atlas
-        run: |
-          cat > publish_to_nomic.py <<'PY'
+          python - <<'PY'
           import json
-          import os
-          import time
-          from pathlib import Path
+          import urllib.request
 
-          import numpy as np
-          from nomic import AtlasDataset, login
-
-          ROOT = Path(__file__).resolve().parent
-          TARGETS = [
-              ('words', 'voynich-dinov3-words-20260713-v1', 'voynich-dinov3-word-map'),
-              ('proposals_50k', 'voynich-dinov3-proposals-50k-20260713-v1', 'voynich-dinov3-proposal-map'),
-          ]
-          TERMINAL_FAILURES = {'Failed', 'Error', 'Cancelled', 'Canceled'}
-
-          def load_rows(path: Path):
-              with path.open(encoding='utf-8') as handle:
-                  rows = [json.loads(line) for line in handle if line.strip()]
-              return [
-                  {key: (int(value) if isinstance(value, bool) else value) for key, value in row.items()}
-                  for row in rows
+          targets = {
+              'voynich-dinov3-words-20260713-v1': 37886,
+              'voynich-dinov3-proposals-50k-20260713-v1': 50000,
+          }
+          results = []
+          for slug, expected_rows in targets.items():
+              url = f'https://api-atlas.nomic.ai/v1/project/edwardbozzard/{slug}'
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  project = json.load(response)
+              rows = int(project['total_datums_in_project'])
+              projections = [
+                  projection
+                  for index in project.get('atlas_indices', [])
+                  for projection in index.get('projections', [])
+                  if projection.get('ready') is True
               ]
-
-          def find_projection(dataset, index_name):
-              for index in dataset.indices:
-                  if index.name == index_name and index.projections:
-                      return index.projections[0]
-              return None
-
-          def links(dataset, projection=None):
-              dataset_link = (
-                  f"{dataset.web_path}/data/"
-                  f"{dataset.meta['organization_slug']}/{dataset.meta['slug']}"
-              )
-              return dataset_link, projection.map_link if projection is not None else None
-
-          def wait_for_projection(dataset, index_name, timeout_seconds=5400):
-              deadline = time.monotonic() + timeout_seconds
-              last_stage = None
-              while time.monotonic() < deadline:
-                  projection = find_projection(dataset, index_name)
-                  if projection is not None:
-                      status = projection._status
-                      stage = status.get('index_build_stage', 'Unknown')
-                      if stage != last_stage:
-                          print(f'{dataset.identifier}: index stage {stage}', flush=True)
-                          last_stage = stage
-                      if stage == 'Completed':
-                          return projection, status
-                      if stage in TERMINAL_FAILURES:
-                          raise RuntimeError(f'{dataset.identifier}: index failed: {status}')
-                  else:
-                      print(f'{dataset.identifier}: waiting for projection registration', flush=True)
-                  time.sleep(15)
-              raise TimeoutError(f'{dataset.identifier}: index did not complete within {timeout_seconds}s')
-
-          def publish(folder, identifier, index_name):
-              bundle = ROOT / folder
-              rows = load_rows(bundle / 'atlas_metadata.jsonl')
-              embeddings = np.asarray(
-                  np.load(bundle / 'atlas_embeddings.npy', mmap_mode='r'),
-                  dtype=np.float32,
-              )
-              if type(embeddings) is not np.ndarray:
-                  raise TypeError(f'Expected ndarray, got {type(embeddings)!r}')
-              if embeddings.shape[0] != len(rows):
-                  raise RuntimeError(f'{identifier}: row/vector mismatch')
-
-              dataset = AtlasDataset(
-                  identifier=identifier,
-                  description=(
-                      'Voynich Manuscript DINOv3 visual embeddings; normalized-view crops only; '
-                      'provenance-preserving metadata.'
-                  ),
-                  unique_id_field='atlas_id',
-                  is_public=True,
-              )
-              dataset._latest_dataset_state()
-              before = int(dataset.total_datums)
-              expected = len(rows)
-              print(f'{dataset.identifier}: existing rows {before}; expected {expected}', flush=True)
-
-              if before == 0:
-                  dataset.add_data(data=rows, embeddings=embeddings)
-                  dataset._latest_dataset_state()
-                  after = int(dataset.total_datums)
-                  if after != expected:
-                      raise RuntimeError(f'{dataset.identifier}: uploaded {after}, expected {expected}')
-                  print(f'{dataset.identifier}: uploaded {after} rows', flush=True)
-              elif before == expected:
-                  print(f'{dataset.identifier}: exact row count already present; skipping upload', flush=True)
-              else:
-                  raise RuntimeError(
-                      f'{dataset.identifier}: has {before} rows, expected {expected}; refusing append'
-                  )
-
-              projection = find_projection(dataset, index_name)
-              if projection is None:
-                  print(f'{dataset.identifier}: creating index {index_name}', flush=True)
-                  try:
-                      projection = dataset.create_index(
-                          name=index_name,
-                          modality='embedding',
-                          topic_model=False,
-                          duplicate_detection=False,
-                      )
-                  except Exception:
-                      dataset._latest_dataset_state()
-                      projection = find_projection(dataset, index_name)
-                      if projection is None:
-                          raise
-              else:
-                  print(f'{dataset.identifier}: index {index_name} already exists', flush=True)
-
-              projection, status = wait_for_projection(dataset, index_name)
-              dataset_link, map_link = links(dataset, projection)
-              return {
-                  'identifier': dataset.identifier,
-                  'rows': expected,
-                  'dataset_link': dataset_link,
-                  'map_link': map_link,
-                  'index_name': index_name,
-                  'index_status': status,
-                  'public': True,
-              }
-
-          def main():
-              token = os.environ.get('NOMIC_API_KEY')
-              if not token:
-                  raise SystemExit('NOMIC_API_KEY is not set')
-              login(token)
-              results = [publish(*target) for target in TARGETS]
-              output = ROOT / 'nomic_publish_result.json'
-              output.write_text(json.dumps(results, indent=2, default=str) + '\n', encoding='utf-8')
-              print(json.dumps(results, indent=2, default=str), flush=True)
-
-          if __name__ == '__main__':
-              main()
+              if rows != expected_rows:
+                  raise SystemExit(f'{slug}: {rows} rows, expected {expected_rows}')
+              if not projections:
+                  raise SystemExit(f'{slug}: no ready projection')
+              results.append({
+                  'slug': slug,
+                  'rows': rows,
+                  'ready_projections': len(projections),
+                  'dataset_link': f'https://atlas.nomic.ai/data/edwardbozzard/{slug}',
+                  'map_link': f'https://atlas.nomic.ai/data/edwardbozzard/{slug}/map',
+              })
+          print(json.dumps(results, indent=2))
           PY
-
-      - name: Publish public Atlas datasets
-        shell: bash
-        working-directory: prepared/vdino3-atlas
-        run: |
-          set +e
-          python publish_to_nomic.py 2>&1 | tee nomic_publish.log
-          status=${PIPESTATUS[0]}
-          exit "$status"
-
-      - name: Preserve publication report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vdino3-nomic-publication-report
-          path: |
-            prepared/vdino3-atlas/nomic_publish_result.json
-            prepared/vdino3-atlas/nomic_publish.log
-          if-no-files-found: warn
-          retention-days: 30
