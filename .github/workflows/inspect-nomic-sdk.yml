@@ -1,4 +1,4 @@
-name: Inspect Nomic map download properties
+name: Test Nomic Atlas vector export
 
 on:
   push:
@@ -12,46 +12,30 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Inspect map download properties
+      - name: Download one public Atlas map
         shell: bash
         run: |
           set -euo pipefail
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 pyarrow pandas numpy
           python - <<'PY'
-          import inspect, os
+          import os, numpy as np
           from nomic import AtlasDataset, login
           login(os.environ['NOMIC_API_KEY'])
           ds=AtlasDataset('edwardbozzard/voynich-dinov3-words-20260713-v1')
           ds._latest_dataset_state()
           m=ds.maps[0]
-          names=[n for n in dir(m) if any(k in n.lower() for k in ('data','embed','download','arrow','coord','neighbor','id'))]
-          print('MAP_TYPE',type(m).__module__,type(m).__name__)
-          print('MAP_DIR',names)
-          for n in names:
-              try:
-                  static=inspect.getattr_static(type(m),n)
-                  print('STATIC',n,type(static).__name__)
-                  if isinstance(static,property):
-                      print(inspect.getsource(static.fget)[:10000])
-                  elif callable(static):
-                      print('SIGNATURE',inspect.signature(static))
-                      print(inspect.getsource(static)[:10000])
-              except Exception as e:
-                  print('STATIC_ERROR',n,type(e).__name__,str(e))
-          print('GET_MAP_SIGNATURE',inspect.signature(AtlasDataset.get_map))
-          print(inspect.getsource(AtlasDataset.get_map)[:12000])
-          for n in names:
-              try:
-                  v=getattr(m,n)
-                  if callable(v):
-                      continue
-                  shape=getattr(v,'shape',None)
-                  print('VALUE',n,type(v).__name__,'shape=',shape,'repr=',repr(v)[:1000])
-              except Exception as e:
-                  print('VALUE_ERROR',n,type(e).__name__,str(e))
+          data=m.data
+          embeddings=m.embeddings
+          print('DATA_TYPE',type(data).__name__,'SHAPE',getattr(data,'shape',None))
+          print('DATA_COLUMNS',getattr(data,'columns',None))
+          print('DATA_HEAD',repr(data.head(2) if hasattr(data,'head') else data[:2])[:5000])
+          print('EMBEDDINGS_TYPE',type(embeddings).__name__,'SHAPE',getattr(embeddings,'shape',None),'DTYPE',getattr(embeddings,'dtype',None))
+          arr=np.asarray(embeddings)
+          print('EMBEDDINGS_NORMS',float(np.linalg.norm(arr[0])),float(np.linalg.norm(arr[-1])))
+          print('IDS',m.id,m.projection_id,m.atlas_index_id)
           PY
