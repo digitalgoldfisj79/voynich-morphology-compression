@@ -1,0 +1,33 @@
+name: Transfer vdino3 v2 results
+
+on:
+  push:
+    branches:
+      - feat/nomic-atlas
+    paths:
+      - .github/workflows/transfer-vdino3-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 10 --retry-all-errors \
+            --output vdino3-glyph-program-results-v2.zip \
+            https://lodging-representations-routers-marks.trycloudflare.com/vdino3-glyph-program-results-v2.zip
+          echo "28c1e06bc1d3188c0341d6df871d4c0482d73826df16de830812e54bf9702864  vdino3-glyph-program-results-v2.zip" | sha256sum --check
+          unzip -t vdino3-glyph-program-results-v2.zip
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vdino3-glyph-program-results-v2
+          path: vdino3-glyph-program-results-v2.zip
+          if-no-files-found: error
+          retention-days: 30
