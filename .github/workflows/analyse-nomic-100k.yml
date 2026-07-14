@@ -1,0 +1,62 @@
+name: Analyse existing Nomic 100k map
+
+on:
+  push:
+    branches: [feat/nomic-atlas]
+    paths:
+      - tools/dinov3_program/analyse_nomic_100k.py
+      - .github/workflows/analyse-nomic-100k.yml
+  pull_request:
+    paths:
+      - tools/dinov3_program/analyse_nomic_100k.py
+      - .github/workflows/analyse-nomic-100k.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
+          python -m pip install --quiet nomic==3.9.0 numpy pandas pyarrow scikit-learn scipy
+      - name: Analyse the existing 100k map
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/dinov3_program/analyse_nomic_100k.py --output nomic_100k_audit
+      - name: Validate result inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s nomic_100k_audit/REPORT.md
+          test -s nomic_100k_audit/SUMMARY.json
+          test -s nomic_100k_audit/cluster_audit.csv
+          test -s nomic_100k_audit/cluster_review_examples.csv
+          test -s nomic_100k_audit/benchmark_pairs.csv
+          test -s nomic_100k_audit/segmentation_review_queue.csv
+          test -s nomic_100k_audit/point_diagnostics.parquet
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('nomic_100k_audit/SUMMARY.json').read_text())
+          assert s['rows']==100000, s
+          assert s['clusters']==32, s
+          print(json.dumps(s,indent=2))
+          PY
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: voynich-nomic-100k-audit
+          path: nomic_100k_audit/
+          if-no-files-found: error
+          retention-days: 90
