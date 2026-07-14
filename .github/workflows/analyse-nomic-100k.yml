@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 90
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+      PYTHONWARNINGS: ignore
+      TQDM_DISABLE: 1
     steps:
       - uses: actions/checkout@v4
       - name: Install analysis dependencies
@@ -30,10 +32,27 @@ jobs:
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 numpy pandas pyarrow scikit-learn scipy
       - name: Analyse the existing 100k map
+        id: analyse
         shell: bash
         run: |
-          set -euo pipefail
-          python tools/dinov3_program/analyse_nomic_100k.py --output nomic_100k_audit
+          set +e
+          python tools/dinov3_program/analyse_nomic_100k.py --output nomic_100k_audit >analysis.log 2>&1
+          rc=$?
+          echo "analysis_exit_code=$rc"
+          echo "----- ANALYSIS LOG TAIL -----"
+          tail -n 160 analysis.log || true
+          echo "----- END LOG TAIL -----"
+          exit "$rc"
+      - name: Upload diagnostic log and partial outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voynich-nomic-100k-audit-diagnostic
+          path: |
+            analysis.log
+            nomic_100k_audit/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Validate result inventory
         shell: bash
         run: |
@@ -53,7 +72,7 @@ jobs:
           assert s['clusters']==32, s
           print(json.dumps(s,indent=2))
           PY
-      - name: Upload audit artifact
+      - name: Upload final audit artifact
         uses: actions/upload-artifact@v4
         with:
           name: voynich-nomic-100k-audit
