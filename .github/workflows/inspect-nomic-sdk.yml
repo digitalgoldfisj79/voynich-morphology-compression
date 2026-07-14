@@ -1,4 +1,4 @@
-name: Inspect Nomic project inventory
+name: Inspect Nomic 100k project
 
 on:
   push:
@@ -14,31 +14,33 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: Print compact project inventory
+      - name: Inspect exact project
         shell: bash
         run: |
           set -euo pipefail
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
-          python -m pip install --quiet requests
+          python -m pip install --quiet nomic==3.9.0 numpy pandas pyarrow
           python - <<'PY'
-          import json, os, requests
-          headers={'Authorization': f'Bearer {os.environ["NOMIC_API_KEY"]}', 'User-Agent':'voynich-audit/1'}
-          data=requests.get('https://api-atlas.nomic.ai/v1/organization/edwardbozzard',headers=headers,timeout=60).json()
-          rows=[]
-          for p in data.get('projects',[]):
-              rows.append({
-                  'id':p.get('id'),
-                  'slug':p.get('slug') or p.get('project_name'),
-                  'name':p.get('project_name'),
-                  'rows':p.get('total_datums_in_project'),
-                  'modality':p.get('modality'),
-                  'created':p.get('created_timestamp'),
-                  'public':p.get('is_public'),
-                  'fields':p.get('project_fields'),
-              })
-          print(json.dumps(rows,indent=2))
+          import json, os
+          from nomic import AtlasDataset, login
+          login(os.environ['NOMIC_API_KEY'])
+          ds=AtlasDataset('edwardbozzard/voynich-dinov3-proposals-100k-enriched-20260713-v2')
+          ds._latest_dataset_state()
+          print('PROJECT',json.dumps({
+              'id':ds.id,'identifier':ds.identifier,'rows':ds.total_datums,
+              'fields':ds.dataset_fields,'indices':len(ds.indices),'maps':len(ds.maps)
+          },indent=2))
+          for i,m in enumerate(ds.maps):
+              print('MAP',i,m.id,m.projection_id,m.atlas_index_id,getattr(m,'name',None))
+          m=ds.maps[-1]
+          df=m.data.df
+          print('DF_SHAPE',df.shape)
+          print('DF_COLUMNS',json.dumps(list(df.columns)))
+          print('DF_HEAD',json.dumps(df.head(3).to_dict('records'),default=str)[:12000])
+          emb=m.embeddings.latent
+          print('EMB_SHAPE',emb.shape,'DTYPE',emb.dtype)
           PY
