@@ -1,4 +1,4 @@
-name: Inspect Nomic account projects
+name: Inspect Nomic project inventory
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     env:
       NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
     steps:
-      - name: List accessible projects
+      - name: Print compact project inventory
         shell: bash
         run: |
           set -euo pipefail
@@ -27,10 +27,18 @@ jobs:
           python - <<'PY'
           import json, os, requests
           headers={'Authorization': f'Bearer {os.environ["NOMIC_API_KEY"]}', 'User-Agent':'voynich-audit/1'}
-          base='https://api-atlas.nomic.ai'
-          for path in ['/v1/user','/v1/organization/edwardbozzard']:
-              r=requests.get(base+path,headers=headers,timeout=60)
-              print('ENDPOINT',path,'STATUS',r.status_code)
-              data=r.json() if r.headers.get('content-type','').startswith('application/json') else {'text':r.text[:1000]}
-              print(json.dumps(data,indent=2)[:50000])
+          data=requests.get('https://api-atlas.nomic.ai/v1/organization/edwardbozzard',headers=headers,timeout=60).json()
+          rows=[]
+          for p in data.get('projects',[]):
+              rows.append({
+                  'id':p.get('id'),
+                  'slug':p.get('slug') or p.get('project_name'),
+                  'name':p.get('project_name'),
+                  'rows':p.get('total_datums_in_project'),
+                  'modality':p.get('modality'),
+                  'created':p.get('created_timestamp'),
+                  'public':p.get('is_public'),
+                  'fields':p.get('project_fields'),
+              })
+          print(json.dumps(rows,indent=2))
           PY
