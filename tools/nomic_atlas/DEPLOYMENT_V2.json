@@ -1,0 +1,116 @@
+{
+  "schema_version": "voynich-nomic-atlas-deployment/2",
+  "deployed_at": "2026-07-13",
+  "visibility": "public",
+  "seed": 20260713,
+  "source": {
+    "huggingface_dataset": "Digitalgoldfish79/vdino3-crops",
+    "commit": "b86d96600dc49c5298e07dcecb1ebdbd44970483",
+    "metadata_commit": "85473f247f1221ca6e82f7103666b9d04de4f0f7",
+    "embedding_model": "facebook/dinov3-vitb16-pretrain-lvd1689m",
+    "dimensions": 768
+  },
+  "datasets": [
+    {
+      "level": "word",
+      "identifier": "edwardbozzard/voynich-dinov3-words-enriched-20260713-v2",
+      "rows": 37886,
+      "ready_projection_count": 1,
+      "dataset_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-words-enriched-20260713-v2",
+      "map_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-words-enriched-20260713-v2/map",
+      "annotations": [
+        "hand",
+        "currier",
+        "section",
+        "word_frequency",
+        "knn_purity20",
+        "cross_folio_knn_purity20",
+        "nearest_neighbor_cosine",
+        "nearest_same_word_id",
+        "nearest_same_word_cosine",
+        "nearest_other_word_id",
+        "nearest_other_word",
+        "nearest_other_word_cosine",
+        "word_outlier_score",
+        "alias_max_count",
+        "visual_mode",
+        "mode_silhouette",
+        "review_queue",
+        "review_priority"
+      ]
+    },
+    {
+      "level": "proposal",
+      "identifier": "edwardbozzard/voynich-dinov3-proposals-100k-enriched-20260713-v2",
+      "rows": 100000,
+      "candidate_rows": 747672,
+      "ready_projection_count": 1,
+      "dataset_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-proposals-100k-enriched-20260713-v2",
+      "map_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-proposals-100k-enriched-20260713-v2/map",
+      "sampling": {
+        "method": "deterministic stratified sample",
+        "seed": 20260713,
+        "rows": 100000
+      },
+      "annotations": [
+        "hand",
+        "currier",
+        "section",
+        "cluster",
+        "cluster_distance",
+        "cluster_size",
+        "cluster_eva_purity",
+        "cluster_dominant_eva",
+        "cluster_kind_purity",
+        "cluster_dominant_kind",
+        "eva_knn_purity10",
+        "proposal_outlier_score",
+        "slot_fraction",
+        "heldout_eva_prediction",
+        "heldout_eva_correct"
+      ]
+    }
+  ],
+  "review_workbench": {
+    "benchmark_pairs": {
+      "exact_positive_candidates": 400,
+      "allographic_positive_candidates": 300,
+      "hard_negative_candidates": 300,
+      "total": 1000,
+      "adjudicated": false
+    },
+    "proposal_clusters": 32,
+    "proposal_review_records": 320,
+    "embedded_crop_thumbnails": 350,
+    "word_crop_coverage": 0.031093279839518557,
+    "proposal_crop_coverage": 0.02403
+  },
+  "artifacts": {
+    "full_archive": {
+      "filename": "voynich-atlas-enriched-v2.zip",
+      "bytes": 376515197,
+      "sha256": "8f4c529abf8aca2de7ec0a1c55cc5f05b3b5805e97de6614ed8f961c9ceabd15"
+    },
+    "github_actions": {
+      "workflow_run_id": 29293681601,
+      "artifact_id": 8295968661,
+      "artifact_name": "voynich-atlas-enriched-v2-100k",
+      "artifact_digest": "sha256:0c2b7e7887ae4b454786857dc94ef653f09dc9090eacfa113bee44352a26b456",
+      "expires_at": "2026-10-11T23:39:26Z"
+    }
+  },
+  "verification": {
+    "archive_sha256_match": true,
+    "archive_zip_test_passed": true,
+    "public_api_row_counts_match": true,
+    "public_pages_ready": true,
+    "word_ready_projections": 1,
+    "proposal_ready_projections": 1
+  },
+  "atlas_server_note": {
+    "metadata_fields_present": true,
+    "server_reported_colorable_fields": [],
+    "client_request_behavior": "nomic 3.9.0 create_index automatically submitted all non-internal fields as colorable_fields",
+    "interpretation": "The public API currently reports an empty colorable_fields array for user-supplied embedding maps despite the enriched metadata being stored. No non-destructive SDK method exists to patch an existing map's colorable fields."
+  }
+}

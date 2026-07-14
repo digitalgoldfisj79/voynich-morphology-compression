@@ -1,0 +1,86 @@
+name: Analyse existing Nomic 100k map
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+      PYTHONWARNINGS: ignore
+      TQDM_DISABLE: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
+          python -m pip install --quiet nomic==3.9.0 numpy pandas pyarrow scikit-learn scipy
+      - name: Apply local neighbour-search compatibility patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tools/dinov3_program/analyse_nomic_100k.py')
+          s=p.read_text()
+          old='''    row_by_id = {str(row[id_col]): row for _, row in df.iterrows()}\n    pair_candidates: list[dict[str, object]] = []\n    for start in range(0, len(candidate_ids), 200):\n        query_ids = candidate_ids[start : start + 200]\n        neighbor_ids, distances = projection.embeddings.vector_search(ids=query_ids, k=30)\n'''
+          new='''    row_by_id = {str(row[id_col]): row for _, row in df.iterrows()}\n    index_by_id = {str(value): i for i, value in enumerate(df[id_col].astype(str))}\n    pair_candidates: list[dict[str, object]] = []\n    for start in range(0, len(candidate_ids), 100):\n        query_ids = candidate_ids[start : start + 100]\n        query_indices = np.asarray([index_by_id[q] for q in query_ids], dtype=np.int64)\n        approximate = Z[query_indices] @ Z.T\n        k_local = 31\n        shortlist = np.argpartition(approximate, -k_local, axis=1)[:, -k_local:]\n        neighbor_ids = []\n        distances = []\n        for row_number, query_index in enumerate(query_indices):\n            candidates = shortlist[row_number]\n            candidates = candidates[np.argsort(-approximate[row_number, candidates])]\n            candidates = [int(j) for j in candidates if int(j) != int(query_index)][:30]\n            neighbor_ids.append([str(df.iloc[j][id_col]) for j in candidates])\n            distances.append([float(1.0 - np.dot(X[query_index], X[j])) for j in candidates])\n'''
+          if old not in s:
+              raise SystemExit('Expected deprecated vector_search block not found')
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Analyse the existing 100k map
+        id: analyse
+        shell: bash
+        run: |
+          set +e
+          python tools/dinov3_program/analyse_nomic_100k.py --output nomic_100k_audit >analysis.log 2>&1
+          rc=$?
+          echo "analysis_exit_code=$rc"
+          echo "----- ANALYSIS LOG TAIL -----"
+          tail -n 160 analysis.log || true
+          echo "----- END LOG TAIL -----"
+          exit "$rc"
+      - name: Upload diagnostic log and partial outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voynich-nomic-100k-audit-diagnostic
+          path: |
+            analysis.log
+            nomic_100k_audit/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Validate result inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s nomic_100k_audit/REPORT.md
+          test -s nomic_100k_audit/SUMMARY.json
+          test -s nomic_100k_audit/cluster_audit.csv
+          test -s nomic_100k_audit/cluster_review_examples.csv
+          test -s nomic_100k_audit/benchmark_pairs.csv
+          test -s nomic_100k_audit/segmentation_review_queue.csv
+          test -s nomic_100k_audit/point_diagnostics.parquet
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('nomic_100k_audit/SUMMARY.json').read_text())
+          assert s['rows']==100000, s
+          assert s['clusters']==32, s
+          print(json.dumps(s,indent=2))
+          PY
+      - name: Upload final audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: voynich-nomic-100k-audit
+          path: nomic_100k_audit/
+          if-no-files-found: error
+          retention-days: 90

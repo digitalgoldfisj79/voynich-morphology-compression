@@ -1,0 +1,57 @@
+{
+  "schema_version": "voynich-nomic-atlas-deployment/1",
+  "deployed_at": "2026-07-13",
+  "visibility": "public",
+  "source": {
+    "huggingface_dataset": "Digitalgoldfish79/vdino3-crops",
+    "commit": "b86d96600dc49c5298e07dcecb1ebdbd44970483",
+    "embedding_model": "facebook/dinov3-vitb16-pretrain-lvd1689m",
+    "source_embedding_rows": 1762602,
+    "dimensions": 768
+  },
+  "prepared_bundle": {
+    "filename": "vdino3-nomic-atlas-bundles.zip",
+    "sha256": "dfba80552f1bb4db0e2c70dffd1b2e6be8e23cf09cb0089caee797dc2e54ef1d"
+  },
+  "datasets": [
+    {
+      "level": "word",
+      "identifier": "edwardbozzard/voynich-dinov3-words-20260713-v1",
+      "project_id": "376fbb41-9904-4e88-8fbe-33eddbf64d0f",
+      "rows": 37886,
+      "folios": 225,
+      "view": "norm",
+      "ready_projection_count": 2,
+      "dataset_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-words-20260713-v1",
+      "map_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-words-20260713-v1/map"
+    },
+    {
+      "level": "proposal",
+      "identifier": "edwardbozzard/voynich-dinov3-proposals-50k-20260713-v1",
+      "project_id": "40665614-8df2-48da-8a9e-64b6ba6a1fef",
+      "rows": 50000,
+      "candidate_rows": 747672,
+      "sampling": {
+        "method": "deterministic proportional bottom-k",
+        "seed": 20260713,
+        "strata": ["kind", "folio", "eva_aligned"]
+      },
+      "view": "norm",
+      "low_conf": false,
+      "ready_projection_count": 1,
+      "dataset_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-proposals-50k-20260713-v1",
+      "map_link": "https://atlas.nomic.ai/data/edwardbozzard/voynich-dinov3-proposals-50k-20260713-v1/map"
+    }
+  ],
+  "atlas_options": {
+    "vector_normalization": "l2",
+    "dtype": "float32",
+    "topic_model": false,
+    "duplicate_detection": false
+  },
+  "verification": {
+    "public_api_row_counts_match": true,
+    "public_pages_http_200": true,
+    "ready_projections_present": true
+  }
+}

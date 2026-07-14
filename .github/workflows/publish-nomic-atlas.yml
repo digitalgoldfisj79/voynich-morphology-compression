@@ -1,0 +1,50 @@
+name: Verify Voynich DINOv3 Atlas
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify public Atlas datasets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import urllib.request
+
+          targets = {
+              'voynich-dinov3-words-20260713-v1': 37886,
+              'voynich-dinov3-proposals-50k-20260713-v1': 50000,
+          }
+          results = []
+          for slug, expected_rows in targets.items():
+              url = f'https://api-atlas.nomic.ai/v1/project/edwardbozzard/{slug}'
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  project = json.load(response)
+              rows = int(project['total_datums_in_project'])
+              projections = [
+                  projection
+                  for index in project.get('atlas_indices', [])
+                  for projection in index.get('projections', [])
+                  if projection.get('ready') is True
+              ]
+              if rows != expected_rows:
+                  raise SystemExit(f'{slug}: {rows} rows, expected {expected_rows}')
+              if not projections:
+                  raise SystemExit(f'{slug}: no ready projection')
+              results.append({
+                  'slug': slug,
+                  'rows': rows,
+                  'ready_projections': len(projections),
+                  'dataset_link': f'https://atlas.nomic.ai/data/edwardbozzard/{slug}',
+                  'map_link': f'https://atlas.nomic.ai/data/edwardbozzard/{slug}/map',
+              })
+          print(json.dumps(results, indent=2))
+          PY
