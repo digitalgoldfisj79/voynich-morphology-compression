@@ -1,15 +1,6 @@
 name: Analyse existing Nomic 100k map
 
 on:
-  push:
-    branches: [feat/nomic-atlas]
-    paths:
-      - tools/dinov3_program/analyse_nomic_100k.py
-      - .github/workflows/analyse-nomic-100k.yml
-  pull_request:
-    paths:
-      - tools/dinov3_program/analyse_nomic_100k.py
-      - .github/workflows/analyse-nomic-100k.yml
   workflow_dispatch:
 
 permissions:
