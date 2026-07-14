@@ -4,6 +4,8 @@ on:
   push:
     branches: [feat/nomic-atlas]
     paths: [.github/workflows/inspect-nomic-sdk.yml]
+  pull_request:
+    paths: [.github/workflows/inspect-nomic-sdk.yml]
   workflow_dispatch:
 
 permissions:
