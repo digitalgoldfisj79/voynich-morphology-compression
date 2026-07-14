@@ -1,0 +1,34 @@
+name: Inspect Nomic account projects
+
+on:
+  push:
+    branches: [feat/nomic-atlas]
+    paths: [.github/workflows/inspect-nomic-sdk.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+    steps:
+      - name: List accessible projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
+          python -m pip install --quiet requests
+          python - <<'PY'
+          import json, os, requests
+          headers={'Authorization': f'Bearer {os.environ["NOMIC_API_KEY"]}', 'User-Agent':'voynich-audit/1'}
+          base='https://api-atlas.nomic.ai'
+          for path in ['/v1/user','/v1/organization/edwardbozzard']:
+              r=requests.get(base+path,headers=headers,timeout=60)
+              print('ENDPOINT',path,'STATUS',r.status_code)
+              data=r.json() if r.headers.get('content-type','').startswith('application/json') else {'text':r.text[:1000]}
+              print(json.dumps(data,indent=2)[:50000])
+          PY
