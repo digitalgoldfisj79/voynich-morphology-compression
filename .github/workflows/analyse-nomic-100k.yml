@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
           test -n "${NOMIC_API_KEY:-}" || { echo 'NOMIC_API_KEY missing'; exit 2; }
           python -m pip install --quiet nomic==3.9.0 numpy pandas pyarrow scikit-learn scipy
-      - name: Apply current Nomic vector-search compatibility patch
+      - name: Apply local neighbour-search compatibility patch
         shell: bash
         run: |
           set -euo pipefail
@@ -40,7 +40,7 @@ jobs:
           p=Path('tools/dinov3_program/analyse_nomic_100k.py')
           s=p.read_text()
           old='''    row_by_id = {str(row[id_col]): row for _, row in df.iterrows()}\n    pair_candidates: list[dict[str, object]] = []\n    for start in range(0, len(candidate_ids), 200):\n        query_ids = candidate_ids[start : start + 200]\n        neighbor_ids, distances = projection.embeddings.vector_search(ids=query_ids, k=30)\n'''
-          new='''    row_by_id = {str(row[id_col]): row for _, row in df.iterrows()}\n    index_by_id = {str(value): i for i, value in enumerate(df[id_col].astype(str))}\n    pair_candidates: list[dict[str, object]] = []\n    for start in range(0, len(candidate_ids), 200):\n        query_ids = candidate_ids[start : start + 200]\n        query_indices = [index_by_id[q] for q in query_ids]\n        query_vectors = np.asarray(X[query_indices], dtype=np.float32)\n        neighbor_ids, distances = projection.embeddings.vector_search(queries=query_vectors, k=30)\n'''
+          new='''    row_by_id = {str(row[id_col]): row for _, row in df.iterrows()}\n    index_by_id = {str(value): i for i, value in enumerate(df[id_col].astype(str))}\n    pair_candidates: list[dict[str, object]] = []\n    for start in range(0, len(candidate_ids), 100):\n        query_ids = candidate_ids[start : start + 100]\n        query_indices = np.asarray([index_by_id[q] for q in query_ids], dtype=np.int64)\n        approximate = Z[query_indices] @ Z.T\n        k_local = 31\n        shortlist = np.argpartition(approximate, -k_local, axis=1)[:, -k_local:]\n        neighbor_ids = []\n        distances = []\n        for row_number, query_index in enumerate(query_indices):\n            candidates = shortlist[row_number]\n            candidates = candidates[np.argsort(-approximate[row_number, candidates])]\n            candidates = [int(j) for j in candidates if int(j) != int(query_index)][:30]\n            neighbor_ids.append([str(df.iloc[j][id_col]) for j in candidates])\n            distances.append([float(1.0 - np.dot(X[query_index], X[j])) for j in candidates])\n'''
           if old not in s:
               raise SystemExit('Expected deprecated vector_search block not found')
           p.write_text(s.replace(old,new))
