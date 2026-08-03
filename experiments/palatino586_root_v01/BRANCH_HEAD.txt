@@ -1,0 +1,2 @@
+Branch: gpt56/p586-root-v01-20260803
+Closeout sequence ends with this marker.
