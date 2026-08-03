@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audited v3 launcher for the final human-readable evidence bundle."""
 import requests
-URL="https://raw.githubusercontent.com/digitalgoldfisj79/voynich-morphology-compression/gpt56/p586-plant-v01-20260803/experiments/palatino586_plant_v01/p586_build_human_bundle.py"
+URL="https://raw.githubusercontent.com/digitalgoldfisj79/voynich-morphology-compression/2951ef881177c02eebb38b63b767106385eedcba/experiments/palatino586_plant_v01/p586_build_human_bundle.py"
 source=requests.get(URL,timeout=120).text
 old='TARGET="bncf_palatino_586";IDS=[TARGET,"voynich","bnf_lat_6862","herb_8510642bf2ce","herb_c51d653739d2","herb_0b5263630edb","herb_18f0aa144a2b","herb_eaec4fe75d89","herb_78e2bbc79062","herb_d91d01bd5276","bsb1784","herb_7ce7efc90e6d","herb_fafef9a26da5","herb_205bfb89efbc"]'
 new='TARGET="bncf_palatino_586";IDS=[]'
