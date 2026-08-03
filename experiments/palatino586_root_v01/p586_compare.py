@@ -52,23 +52,32 @@ def feature_batch(model,proc,images,batch=24):
             h=model(**inp).last_hidden_state.float();f=torch.cat([h[:,0],h[:,1:].mean(1),h[:,1:].amax(1)],dim=1);f=torch.nn.functional.normalize(f,dim=1)
         feats.append(f.cpu().numpy().astype('float32'));log('embed',done=min(s+batch,len(images)),total=len(images))
     return np.concatenate(feats)
-def ci_boot(values,B=10000):
-    rng=np.random.default_rng(SEED);v=np.asarray(values,float);means=np.empty(B)
-    for i in range(B):means[i]=rng.choice(v,len(v),replace=True).mean()
+def group_means(values,groups):
+    values=np.asarray(values,float);groups=np.asarray(groups)
+    keys=np.unique(groups)
+    return np.array([values[groups==k].mean() for k in keys],dtype=float)
+def ci_boot_group(values,groups,B=10000):
+    rng=np.random.default_rng(SEED);gm=group_means(values,groups);means=np.empty(B)
+    for i in range(B):means[i]=rng.choice(gm,len(gm),replace=True).mean()
     return [float(np.quantile(means,.025)),float(np.quantile(means,.975))]
-def matched_test(P,V,BX,reps=10000):
+def matched_test(P,V,BX,page_ids,reps=10000):
     rng=np.random.default_rng(SEED);m=min(len(V),len(BX));obs=[];null=[];win=[]
+    page_ids=np.asarray(page_ids)
     for _ in range(reps):
         vi=rng.choice(len(V),m,replace=False); pool=np.concatenate([V[vi],BX],axis=0)
         sv=P@pool.T; a=sv[:,:m]; b=sv[:,m:]
-        o=float((np.sort(a,axis=1)[:,-3:].mean(1)-np.sort(b,axis=1)[:,-3:].mean(1)).mean());obs.append(o)
-        win.append(float((a.max(1)>b.max(1)).mean()))
+        crop_delta=np.sort(a,axis=1)[:,-3:].mean(1)-np.sort(b,axis=1)[:,-3:].mean(1)
+        obs.append(float(group_means(crop_delta,page_ids).mean()))
+        crop_best=a.max(1)-b.max(1)
+        win.append(float((group_means(crop_best,page_ids)>0).mean()))
         perm=rng.permutation(2*m); aa=sv[:,perm[:m]];bb=sv[:,perm[m:]]
-        null.append(float((np.sort(aa,axis=1)[:,-3:].mean(1)-np.sort(bb,axis=1)[:,-3:].mean(1)).mean()))
-    obs=np.array(obs);null=np.array(null)
-    return {'matched_reference_size':m,'repetitions':reps,'mean_top3_delta':float(obs.mean()),'delta_interval':[float(np.quantile(obs,.025)),float(np.quantile(obs,.975))],
-            'nearest_voynich_fraction':float(np.mean(win)),'nearest_voynich_interval':[float(np.quantile(win,.025)),float(np.quantile(win,.975))],
-            'permutation_p':float((1+np.sum(null>=obs))/(1+reps)),'null_mean':float(null.mean()),'null_sd':float(null.std(ddof=1))}
+        null_crop=np.sort(aa,axis=1)[:,-3:].mean(1)-np.sort(bb,axis=1)[:,-3:].mean(1)
+        null.append(float(group_means(null_crop,page_ids).mean()))
+    obs=np.array(obs);null=np.array(null);obs_mean=float(obs.mean())
+    return {'unit':'Palatino page','n_pages':int(len(np.unique(page_ids))),'matched_reference_size':m,'repetitions':reps,
+            'mean_top3_delta':obs_mean,'reference_subsample_interval':[float(np.quantile(obs,.025)),float(np.quantile(obs,.975))],
+            'page_voynich_win_fraction':float(np.mean(win)),'page_win_interval':[float(np.quantile(win,.025)),float(np.quantile(win,.975))],
+            'permutation_p':float((1+np.sum(null>=obs_mean))/(1+reps)),'null_mean':float(null.mean()),'null_sd':float(null.std(ddof=1))}
 def pair_sheet(rows,start,count=6):
     batch=rows[start:start+count];cols=3;cw=330;ch=350;sheet=Image.new('RGB',(cols*cw,len(batch)*ch),'white');d=ImageDraw.Draw(sheet)
     for ri,r in enumerate(batch):
@@ -79,13 +88,14 @@ def pair_sheet(rows,start,count=6):
     bio=io.BytesIO();sheet.save(bio,'JPEG',quality=90,optimize=True);return bio.getvalue()
 
 protocol={'protocol_id':'P586-VOYNICH-ROOT-COMPARE-V0.1-20260803','run_id':RUN_ID,'seed':SEED,'model_id':MODEL_ID,'locator_run':LOCATOR_RUN,
-          'primary_set':'CLEAR_ROOT only if n>=10, otherwise CLEAR_ROOT+PARTIAL_ROOT','control':'BSB Cgm 728 roots, matched to 25 Voynich roots per repetition','repetitions':10000,
+          'primary_set':'all independently located boxes; Qwen crop-QA collapsed to PARTIAL_ROOT and is recorded as non-discriminating','control':'BSB Cgm 728 roots, matched to 25 Voynich roots per repetition','inference_unit':'Palatino page','repetitions':10000,
           'claim_limit':'exploratory morphological enrichment only; no exemplar/source inference'}
 upload('protocol.json','application/json',json.dumps(protocol,indent=2,sort_keys=True).encode())
 accepted=get(ACCEPTED_URL).json();all_locator=get(ALL_LOCATOR_URL).json()
-clear=[r for r in accepted if r.get('qa_label')=='CLEAR_ROOT'];primary=clear if len(clear)>=10 else accepted
+clear=[r for r in accepted if r.get('qa_label')=='CLEAR_ROOT'];primary=accepted
 rejected=[r for r in all_locator if not r.get('accepted')]
-log('palatino_sets',accepted=len(accepted),clear=len(clear),primary=len(primary),rejected=len(rejected))
+qa_counts={k:sum(r.get('qa_label')==k for r in all_locator) for k in ['CLEAR_ROOT','PARTIAL_ROOT','NOT_ROOT','UNCERTAIN','UNPARSED']}
+log('palatino_sets',accepted=len(accepted),clear=len(clear),primary=len(primary),rejected=len(rejected),qa_counts=qa_counts)
 
 vrows=fetch_objects('voynich',['root','plant']);brows=fetch_objects('bsb1784',['root'])
 vroot=[r for r in vrows if r['part']=='root'];vplant=[r for r in vrows if r['part']=='plant']
@@ -123,7 +133,15 @@ p_root=clf.predict_proba(PX)[:,1];r_root=clf.predict_proba(RX)[:,1] if len(RX) e
 
 pv=PX@VX.T;pb=PX@BX.T
 p_v_top1=pv.max(1);p_b_top1=pb.max(1);delta=p_v_top1-p_b_top1
-matched=matched_test(PX,VX,BX,10000)
+page_ids=np.array([int(r['page']) for r in pmeta])
+matched=matched_test(PX,VX,BX,page_ids,10000)
+page_delta=group_means(delta,page_ids)
+page_v=group_means(p_v_top1,page_ids);page_b=group_means(p_b_top1,page_ids)
+high=p_root>=0.5
+sensitivity=None
+if int(high.sum())>=10 and len(np.unique(page_ids[high]))>=5:
+    hd=group_means(delta[high],page_ids[high])
+    sensitivity={'threshold':'root_probability >= 0.5 (descriptive, not an admission gate)','n_crops':int(high.sum()),'n_pages':int(len(np.unique(page_ids[high]))),'page_delta_mean':float(hd.mean()),'page_delta_ci':ci_boot_group(delta[high],page_ids[high]),'page_voynich_win_fraction':float((hd>0).mean())}
 
 pair_rows=[]
 for i,r in enumerate(pmeta):
@@ -133,8 +151,9 @@ for s in range(0,len(pair_rows),6):upload(f'pair_sheets/pairs_{s:03d}-{min(s+5,l
 
 serial_pairs=[{k:v for k,v in r.items() if not k.endswith('_image')} for r in pair_rows]
 report={'protocol':protocol,'counts':{'palatino_primary':len(PX),'palatino_clear':len(clear),'palatino_all_accepted':len(accepted),'palatino_rejected_available':len(RX),'voynich_roots':len(VX),'voynich_plants':len(VPX),'bsb_roots':len(BX)},
-        'root_validity':{'voynich_grouped_auc_mean':float(auc.mean()),'voynich_grouped_auc_sd':float(auc.std()),'palatino_median_probability':float(np.median(p_root)),'palatino_mean_probability':float(np.mean(p_root)),'rejected_median_probability':float(np.median(r_root)) if len(r_root) else None},
-        'similarity':{'palatino_to_voynich_top1_mean':float(p_v_top1.mean()),'palatino_to_bsb_top1_mean':float(p_b_top1.mean()),'top1_delta_mean':float(delta.mean()),'top1_delta_ci':ci_boot(delta),'voynich_win_fraction':float((delta>0).mean()),'matched_test':matched},
+        'qa_diagnostic':{'counts':qa_counts,'discriminating':len([v for v in qa_counts.values() if v>0])>1,'interpretation':'Qwen crop-QA labels are not used as an admission gate'},
+        'root_validity':{'voynich_grouped_auc_mean':float(auc.mean()),'voynich_grouped_auc_sd':float(auc.std()),'palatino_median_probability':float(np.median(p_root)),'palatino_mean_probability':float(np.mean(p_root)),'palatino_fraction_ge_0_5':float(high.mean()),'rejected_median_probability':float(np.median(r_root)) if len(r_root) else None},
+        'similarity':{'unit':'Palatino page','n_pages':int(len(np.unique(page_ids))),'palatino_to_voynich_top1_page_mean':float(page_v.mean()),'palatino_to_bsb_top1_page_mean':float(page_b.mean()),'top1_page_delta_mean':float(page_delta.mean()),'top1_page_delta_ci':ci_boot_group(delta,page_ids),'page_voynich_win_fraction':float((page_delta>0).mean()),'matched_test':matched,'root_probability_sensitivity':sensitivity},
         'pairs':serial_pairs}
 blob=json.dumps(report,sort_keys=True,separators=(',',':')).encode();report['result_sha256']=hashlib.sha256(blob).hexdigest()
 upload('comparison_report.json','application/json',json.dumps(report,indent=2,sort_keys=True).encode())
