@@ -1,0 +1,37 @@
+name: P586 verified bundle handoff
+
+on:
+  push:
+    branches:
+      - gpt56/p586-root-v01-20260803
+    paths:
+      - '.github/workflows/p586-bundle-handoff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download verified bundle
+        run: |
+          curl --fail --location --retry 5 --retry-delay 2 \
+            'https://ymaqlcfjmdwncdbjprmw.supabase.co/storage/v1/object/public/bridge/p586_root_v01/bundles/Palatino586_Voynich_Root_Morphology_Human_Readable_v01.zip' \
+            --output Palatino586_Voynich_Root_Morphology_Human_Readable_v01.zip
+
+      - name: Verify checksum and archive
+        run: |
+          echo '25a9c3606468b1a6053e77e31fb7bfa867c6897420604ee4d2edb0aafd94013f  Palatino586_Voynich_Root_Morphology_Human_Readable_v01.zip' | sha256sum --check --strict
+          unzip -t Palatino586_Voynich_Root_Morphology_Human_Readable_v01.zip
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Palatino586_Voynich_Root_Morphology_Human_Readable_v01
+          path: Palatino586_Voynich_Root_Morphology_Human_Readable_v01.zip
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
