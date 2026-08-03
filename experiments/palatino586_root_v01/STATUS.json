@@ -1,0 +1,10 @@
+{
+  "protocol_id": "P586-VMS-ROOT-0.1-20260803",
+  "status": "closed_strong_negative_corrected_frozen",
+  "proposal_counts": {"accept": 30, "partial": 107, "reject": 41, "total": 178},
+  "sensitivity_retained": 137,
+  "voynich_roots": 128,
+  "bsb1784_roots": 21,
+  "result_sha256": "588e0aa0a759f84fd8468c043f3fb3eb17b173f0c2fc4af3d186a351148eb206",
+  "no_running_hf_jobs_at_closeout": true
+}
