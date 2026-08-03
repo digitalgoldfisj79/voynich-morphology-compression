@@ -1,0 +1,29 @@
+{
+  "protocol_id": "P586-VMS-PLANT-0.1-20260803",
+  "model_id": "facebook/dinov3-vit7b16-pretrain-lvd1689m",
+  "resolved_revision": "b80367753773648a6793235ab9c65cdbb029506f",
+  "architecture": "DINOv3ViTModel",
+  "hidden_size": 4096,
+  "patch_size": 16,
+  "num_register_tokens": 4,
+  "representation": "last_hidden_state[:,0,:] CLS token, float32 L2-normalized",
+  "preprocessing": {
+    "convert_rgb": true,
+    "resize": [224, 224],
+    "resize_resample": "PIL bilinear (resample code 2)",
+    "rescale_factor": 0.00392156862745098,
+    "image_mean": [0.485, 0.456, 0.406],
+    "image_std": [0.229, 0.224, 0.225],
+    "center_crop": false,
+    "data_format": "channels_first"
+  },
+  "source_files": {
+    "config.json_size": 746,
+    "preprocessor_config.json_size": 585
+  },
+  "legacy_3072_vectors": {
+    "model": "google/gemini-embedding-2",
+    "use_in_this_dinov3_analysis": false,
+    "reason": "not DINOv3 and therefore not commensurable with the frozen DINOv3 feature space"
+  }
+}
