@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - experiment/koen-ra-gap-boundaryblind-20260822
+  pull_request:
   workflow_dispatch:
 
 permissions:
