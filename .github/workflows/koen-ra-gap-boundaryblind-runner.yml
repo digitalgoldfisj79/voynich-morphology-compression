@@ -1,0 +1,46 @@
+name: Koen r-a boundary-blind audit runner
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  boundary-blind-v02:
+    if: github.head_ref == 'experiment/koen-ra-gap-boundaryblind-20260822'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CPU image-analysis dependencies
+        run: python -m pip install --quiet numpy opencv-python-headless requests
+      - name: Verify frozen V02 protocol
+        run: |
+          set -euo pipefail
+          test -s experiments/koen_ra_gap_blind/PROTOCOL.md
+          sha256sum experiments/koen_ra_gap_blind/PROTOCOL.md
+      - name: Run boundary-blind Yale-line experiment
+        run: |
+          set -euo pipefail
+          python experiments/koen_ra_gap_blind/koen_ra_gap_blind.py 2>&1 | tee koen_ra_gap_blind.log
+      - name: Show V02 report
+        if: always()
+        run: |
+          echo '----- V02 REPORT -----'
+          cat results/koen_ra_gap_blind/REPORT.md 2>/dev/null || true
+          echo '----- END V02 REPORT -----'
+      - name: Upload V02 audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: koen-ra-gap-v02-boundaryblind
+          path: |
+            koen_ra_gap_blind.log
+            experiments/koen_ra_gap_blind/PROTOCOL.md
+            experiments/koen_ra_gap_blind/koen_ra_gap_blind.py
+            results/koen_ra_gap_blind/*.json
+            results/koen_ra_gap_blind/*.csv
+            results/koen_ra_gap_blind/REPORT.md
+          if-no-files-found: warn
+          retention-days: 90
