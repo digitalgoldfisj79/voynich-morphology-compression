@@ -15,6 +15,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install DINO image-analysis dependencies
         run: python -m pip install --quiet numpy opencv-python-headless requests
+      - name: Apply page-header parser bugfix
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('experiments/koen_ra_gap/koen_ra_gap.py')
+          s=p.read_text()
+          old='PAGE_RE = re.compile(r"^<(?P<folio>f[^>]+)>\\s+<!\\s*(?P<meta>.*?)>")'
+          new='PAGE_RE = re.compile(r"^<(?P<folio>f\\d+[rv]\\d*)>\\s+<!\\s*(?P<meta>.*?)>", re.I)'
+          if old not in s:
+              raise SystemExit('expected PAGE_RE not found')
+          p.write_text(s.replace(old,new))
+          PY
       - name: Run frozen r-a gap experiment
         run: |
           set -euo pipefail
