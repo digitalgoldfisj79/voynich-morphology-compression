@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   boundary-blind-ra-gap:
+    if: github.event_name != 'pull_request' || github.head_ref != 'experiment/koen-ra-gap-localblind-20260822'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -30,9 +31,7 @@ jobs:
       - name: Show report
         if: always()
         run: |
-          echo '----- REPORT -----'
           cat results/koen_ra_gap_blind/REPORT.md 2>/dev/null || true
-          echo '----- END REPORT -----'
       - name: Upload full audit artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -41,9 +40,42 @@ jobs:
           path: |
             koen_ra_gap_blind.log
             experiments/koen_ra_gap_blind/PROTOCOL.md
-            experiments/koen_ra_gap_blind/koen_ra_gap_blind.py
-            results/koen_ra_gap_blind/*.json
-            results/koen_ra_gap_blind/*.csv
-            results/koen_ra_gap_blind/REPORT.md
+            results/koen_ra_gap_blind/
+          if-no-files-found: warn
+          retention-days: 90
+
+  local-boundary-blind-v04:
+    if: github.event_name == 'pull_request' && github.head_ref == 'experiment/koen-ra-gap-localblind-20260822'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CPU image-analysis dependencies
+        run: python -m pip install --quiet numpy opencv-python-headless requests
+      - name: Verify frozen V04 protocol
+        run: |
+          set -euo pipefail
+          test -s experiments/koen_ra_gap_localblind/PROTOCOL.md
+          sha256sum experiments/koen_ra_gap_localblind/PROTOCOL.md
+      - name: Run V04 local boundary-blind experiment
+        run: |
+          set -euo pipefail
+          python experiments/koen_ra_gap_localblind/koen_ra_gap_localblind.py 2>&1 | tee koen_ra_gap_localblind.log
+      - name: Show V04 report
+        if: always()
+        run: |
+          echo '----- V04 REPORT -----'
+          cat results/koen_ra_gap_localblind/REPORT.md 2>/dev/null || true
+          echo '----- END V04 REPORT -----'
+      - name: Upload V04 audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: koen-ra-gap-v04-localblind
+          path: |
+            koen_ra_gap_localblind.log
+            experiments/koen_ra_gap_localblind/PROTOCOL.md
+            experiments/koen_ra_gap_localblind/koen_ra_gap_localblind.py
+            results/koen_ra_gap_localblind/
           if-no-files-found: warn
           retention-days: 90
