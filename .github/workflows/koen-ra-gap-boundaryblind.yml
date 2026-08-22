@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   boundary-blind-ra-gap:
+    if: github.event_name != 'pull_request' || github.head_ref == 'experiment/koen-ra-gap-boundaryblind-20260822'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -30,9 +31,7 @@ jobs:
       - name: Show report
         if: always()
         run: |
-          echo '----- REPORT -----'
           cat results/koen_ra_gap_blind/REPORT.md 2>/dev/null || true
-          echo '----- END REPORT -----'
       - name: Upload full audit artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,5 +44,39 @@ jobs:
             results/koen_ra_gap_blind/*.json
             results/koen_ra_gap_blind/*.csv
             results/koen_ra_gap_blind/REPORT.md
+          if-no-files-found: warn
+          retention-days: 90
+
+  boundary-blind-v03-cc:
+    if: github.event_name == 'pull_request' && github.head_ref == 'experiment/koen-ra-gap-boundaryblind-cc-20260822'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CPU image-analysis dependencies
+        run: python -m pip install --quiet numpy opencv-python-headless requests
+      - name: Verify frozen V03 protocol
+        run: |
+          set -euo pipefail
+          test -s experiments/koen_ra_gap_blind_cc/PROTOCOL.md
+          sha256sum experiments/koen_ra_gap_blind_cc/PROTOCOL.md
+      - name: Run V03 component-cleaned boundary-blind experiment
+        run: |
+          set -euo pipefail
+          python experiments/koen_ra_gap_blind_cc/koen_ra_gap_blind_cc.py 2>&1 | tee koen_ra_gap_blind_cc.log
+      - name: Show V03 report
+        if: always()
+        run: |
+          cat results/koen_ra_gap_blind_cc/REPORT.md 2>/dev/null || true
+      - name: Upload V03 audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: koen-ra-gap-v03-boundaryblind-cc
+          path: |
+            koen_ra_gap_blind_cc.log
+            experiments/koen_ra_gap_blind_cc/PROTOCOL.md
+            experiments/koen_ra_gap_blind_cc/koen_ra_gap_blind_cc.py
+            results/koen_ra_gap_blind_cc/
           if-no-files-found: warn
           retention-days: 90
