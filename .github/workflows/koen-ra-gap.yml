@@ -1,0 +1,38 @@
+name: Koen r-a physical gap test
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-ra-gap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install DINO image-analysis dependencies
+        run: python -m pip install --quiet numpy opencv-python-headless requests
+      - name: Run frozen r-a gap experiment
+        run: |
+          set -euo pipefail
+          python experiments/koen_ra_gap/koen_ra_gap.py 2>&1 | tee koen_ra_gap.log
+      - name: Show result report
+        if: always()
+        run: |
+          echo '----- REPORT -----'
+          cat results/koen_ra_gap/REPORT.md 2>/dev/null || true
+          echo '----- END REPORT -----'
+      - name: Upload full audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: koen-ra-gap-v01
+          path: |
+            koen_ra_gap.log
+            experiments/koen_ra_gap/PROTOCOL.md
+            results/koen_ra_gap/
+          if-no-files-found: warn
+          retention-days: 90
