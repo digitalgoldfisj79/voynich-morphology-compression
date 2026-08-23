@@ -53,7 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/v05 experiments/koen_ra_gap_v05 results/koen_ra_gap_v05
-          base64 -d tools/koen_v05_visual_locator.py.gz.b64 | gzip -d > /tmp/v05/koen_v05_visual_locator.py
+          cat tools/v05_source_chunks/part0.b64 tools/v05_source_chunks/part1.b64 tools/v05_source_chunks/part2.b64 tools/v05_source_chunks/part3.b64 | base64 -d | gzip -d > /tmp/v05/koen_v05_visual_locator.py
           base64 -d tools/koen_v05_protocol.md.gz.b64 | gzip -d > experiments/koen_ra_gap_v05/PROTOCOL.md
           test "$(sha256sum /tmp/v05/koen_v05_visual_locator.py | awk '{print $1}')" = "feb4cb27212d9d4b6fd6d83a3a504ebd14ebdfb36422302ecccfeeea231270b5"
           test "$(sha256sum experiments/koen_ra_gap_v05/PROTOCOL.md | awk '{print $1}')" = "57725efb7f7fea25890d2a178e3e7b05ad09115fe21ad63861d67bbad3b84803"
