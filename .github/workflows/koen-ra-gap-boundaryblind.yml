@@ -55,7 +55,7 @@ jobs:
           mkdir -p /tmp/v05 experiments/koen_ra_gap_v05 results/koen_ra_gap_v05
           base64 -d tools/koen_v05_visual_locator.py.gz.b64 | gzip -d > /tmp/v05/koen_v05_visual_locator.py
           base64 -d tools/koen_v05_protocol.md.gz.b64 | gzip -d > experiments/koen_ra_gap_v05/PROTOCOL.md
-          test "$(sha256sum /tmp/v05/koen_v05_visual_locator.py | awk '{print $1}')" = "a6593192f415af8f7596e5444325640a939adfcc84bc5a6af93dbe1b28df1b04"
+          test "$(sha256sum /tmp/v05/koen_v05_visual_locator.py | awk '{print $1}')" = "cdb454b8acbc2f00df3e0700e6c1622582bbff18c4e89c8326fc1d65ba9c8080"
           test "$(sha256sum experiments/koen_ra_gap_v05/PROTOCOL.md | awk '{print $1}')" = "57725efb7f7fea25890d2a178e3e7b05ad09115fe21ad63861d67bbad3b84803"
           cp /tmp/v05/koen_v05_visual_locator.py results/koen_ra_gap_v05/koen_v05_visual_locator.py
           sha256sum /tmp/v05/koen_v05_visual_locator.py experiments/koen_ra_gap_v05/PROTOCOL.md
