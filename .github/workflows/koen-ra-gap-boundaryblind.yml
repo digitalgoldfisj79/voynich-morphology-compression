@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   boundary-blind-ra-gap:
+    if: github.head_ref != 'experiment/koen-ra-gap-v05-dino-locator-20260823'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -30,9 +31,7 @@ jobs:
       - name: Show report
         if: always()
         run: |
-          echo '----- REPORT -----'
           cat results/koen_ra_gap_blind/REPORT.md 2>/dev/null || true
-          echo '----- END REPORT -----'
       - name: Upload full audit artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -42,8 +41,20 @@ jobs:
             koen_ra_gap_blind.log
             experiments/koen_ra_gap_blind/PROTOCOL.md
             experiments/koen_ra_gap_blind/koen_ra_gap_blind.py
-            results/koen_ra_gap_blind/*.json
-            results/koen_ra_gap_blind/*.csv
-            results/koen_ra_gap_blind/REPORT.md
+            results/koen_ra_gap_blind/
           if-no-files-found: warn
           retention-days: 90
+
+  v05-proposal-probe:
+    if: github.head_ref == 'experiment/koen-ra-gap-v05-dino-locator-20260823'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install proposal probe dependencies
+        run: python -m pip install --quiet nomic pandas pyarrow
+      - name: Probe pre-existing July proposal corpus only
+        run: python tools/koen_v05_probe.py
