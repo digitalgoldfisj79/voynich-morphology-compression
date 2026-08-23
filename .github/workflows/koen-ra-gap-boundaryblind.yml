@@ -28,10 +28,6 @@ jobs:
         run: |
           set -euo pipefail
           python experiments/koen_ra_gap_blind/koen_ra_gap_blind.py 2>&1 | tee koen_ra_gap_blind.log
-      - name: Show report
-        if: always()
-        run: |
-          cat results/koen_ra_gap_blind/REPORT.md 2>/dev/null || true
       - name: Upload full audit artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,16 +41,42 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
-  v05-proposal-probe:
+  v05-visual-locator:
     if: github.head_ref == 'experiment/koen-ra-gap-v05-dino-locator-20260823'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
-      - name: Install proposal probe dependencies
-        run: python -m pip install --quiet nomic pandas pyarrow
-      - name: Probe pre-existing July proposal corpus only
-        run: python tools/koen_v05_probe.py
+      - name: Install CPU visual-analysis dependencies
+        run: python -m pip install --quiet numpy opencv-python-headless requests scikit-learn
+      - name: Decode and verify frozen V05 source and protocol
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v05 experiments/koen_ra_gap_v05 results/koen_ra_gap_v05
+          base64 -d tools/koen_v05_visual_locator.py.gz.b64 | gzip -d > /tmp/v05/koen_v05_visual_locator.py
+          base64 -d tools/koen_v05_protocol.md.gz.b64 | gzip -d > experiments/koen_ra_gap_v05/PROTOCOL.md
+          test "$(sha256sum /tmp/v05/koen_v05_visual_locator.py | awk '{print $1}')" = "a6593192f415af8f7596e5444325640a939adfcc84bc5a6af93dbe1b28df1b04"
+          test "$(sha256sum experiments/koen_ra_gap_v05/PROTOCOL.md | awk '{print $1}')" = "57725efb7f7fea25890d2a178e3e7b05ad09115fe21ad63861d67bbad3b84803"
+          cp /tmp/v05/koen_v05_visual_locator.py results/koen_ra_gap_v05/koen_v05_visual_locator.py
+          sha256sum /tmp/v05/koen_v05_visual_locator.py experiments/koen_ra_gap_v05/PROTOCOL.md
+      - name: Run V05 held-out calibration then target test if valid
+        run: |
+          set -euo pipefail
+          python /tmp/v05/koen_v05_visual_locator.py 2>&1 | tee koen_v05.log
+      - name: Show V05 report
+        if: always()
+        run: |
+          echo '----- V05 REPORT -----'
+          cat results/koen_ra_gap_v05/REPORT_V05.md 2>/dev/null || true
+          echo '----- END V05 REPORT -----'
+      - name: Upload V05 audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: koen-ra-gap-v05-visual-locator
+          path: |
+            koen_v05.log
+            experiments/koen_ra_gap_v05/PROTOCOL.md
+            results/koen_ra_gap_v05/
+          if-no-files-found: warn
+          retention-days: 90
