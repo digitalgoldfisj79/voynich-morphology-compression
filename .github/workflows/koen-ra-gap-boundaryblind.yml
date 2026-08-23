@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install CPU visual-analysis dependencies
-        run: python -m pip install --quiet numpy opencv-python-headless requests scikit-learn
+        run: python -m pip install --quiet numpy 'opencv-python-headless==4.10.0.84' requests scikit-learn
       - name: Decode and verify frozen V05 source and protocol
         run: |
           set -euo pipefail
