@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Plumbing-only schema probe; retained for audit. Frozen V05 source/protocol live in compressed payloads.
+# Retrigger marker: same-word interior calibration conformance fixed before any calibration result was observed.
 # This file does not inspect Koen ra/r,a/r.a outcomes.
 import json, os, subprocess, sys
 
