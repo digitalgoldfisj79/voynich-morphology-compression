@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Plumbing-only schema probe; does not inspect Koen ra/r,a/r.a outcomes.
 import json, os, subprocess, sys
 
 IDENT = 'edwardbozzard/voynich-dinov3-proposals-100k-enriched-20260713-v2'
