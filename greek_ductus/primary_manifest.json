@@ -1,0 +1,32 @@
+{
+  "protocol": "2026-08-31.greek-ductus.v1",
+  "selection_rule": "Primary ordinary-script controls are Bodleian IIIF manuscripts selected before feature inspection by family provenance, date overlap with 1300-1450, and availability of a stable IIIF manifest. Six manuscripts per family. No visual resemblance criterion was used.",
+  "pages_per_manuscript_target": 6,
+  "crop_cap_per_manuscript": 120,
+  "families": {
+    "GREEK": [
+      {"candidate_id":"2fbb96dd-3f38-4e65-9d7e-075aabb3b578","shelfmark":"MS. Barocci 241","date_start":1325,"date_end":1350,"origin":"Byzantine, Constantinople","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/78ba30ef-a13a-4bd0-a8f1-84660fc58b2b.json"},
+      {"candidate_id":"729fecce-a923-4f02-8335-02e07d5d10f2","shelfmark":"MS. Selden Supra 6","date_start":1330,"date_end":1330,"origin":"Byzantine, Constantinople","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/0137b583-05a1-424e-9962-5b0cd19ec64e.json"},
+      {"candidate_id":"c5a57e28-b86e-4101-9d62-e5612faa8fe7","shelfmark":"MS. Canon. Gr. 38","date_start":1340,"date_end":1360,"origin":"Byzantine, Constantinople","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/6381d38a-fd39-43e7-9c06-8e70340ffce7.json"},
+      {"candidate_id":"0e04a987-0d86-44ab-86bd-63719c7aaa61","shelfmark":"MS. Barocci 197","date_start":1344,"date_end":1344,"origin":"Greek, Constantinople","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/eba7435d-673e-449b-8a8f-bd644ee88ea4.json"},
+      {"candidate_id":"f83d2944-aba3-403a-9e9d-959b6b1202b5","shelfmark":"MS. Canon. Gr. 36","date_start":1300,"date_end":1300,"origin":"Byzantine, Constantinople","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/08be86da-5c83-45cd-8286-9c6a1b79b32f.json"},
+      {"candidate_id":"1f8d4ba3-e9e3-4fc8-9a22-038e1a9ea681","shelfmark":"MS. Barocci 124","date_start":1401,"date_end":1410,"origin":"Greek; production place not asserted in ManuComp","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/61182627-e402-47d1-8299-6cc8d8d96cb4.json"}
+    ],
+    "ITALIAN_LATIN": [
+      {"candidate_id":"2591e6a5-6baf-4ac4-ac92-045c34cf4fb4","shelfmark":"MS. Laud Misc. 587","date_start":1330,"date_end":1330,"origin":"Italian, Venice","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/1dac0552-b0f9-4dc6-82a9-3e94300522d4.json"},
+      {"candidate_id":"896420b9-ec96-432b-a0bb-357b91447f48","shelfmark":"MS. Canon. Class. Lat. 182","date_start":1340,"date_end":1360,"origin":"Italian, Venice (?)","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/20021658-2a19-4a27-8cdb-f2d9d3eb0bb9.json"},
+      {"candidate_id":"af41cc73-3129-4c78-a7ba-984056a1e361","shelfmark":"MS. Canon. Misc. 476","date_start":1340,"date_end":1360,"origin":"Italian, Venice","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/217de342-7b9b-4cbb-942e-a719dff3fb1d.json"},
+      {"candidate_id":"84daeb2e-933c-498a-bc0d-ab9a1f856903","shelfmark":"MS. Lat. liturg. a. 4","date_start":1399,"date_end":1399,"origin":"Italian, Milan","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/6bfcc67a-a650-4056-b497-5d8c1dbd9c67.json"},
+      {"candidate_id":"25adca82-a4f0-4108-920d-02eda827ad98","shelfmark":"MS. Lat. class. d. 8","date_start":1400,"date_end":1400,"origin":"Italy, Padua","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/f698a883-02b5-49c9-ba7e-95376a7bf26c.json"},
+      {"candidate_id":"6dd9f6ef-8481-4244-a9de-6bd4ef8959a9","shelfmark":"MS. Canon. Class. Lat. 110","date_start":1405,"date_end":1406,"origin":"Italian, Venice","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/31964ca6-ddf8-42d8-ba01-8c0e1f9d7d9b.json"}
+    ],
+    "GERMAN": [
+      {"candidate_id":"67d9b67a-5185-4f7a-8d98-8d098ecac635","shelfmark":"MS. Laud Misc. 103","date_start":1325,"date_end":1350,"origin":"German; Germany","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/3aea4fac-919b-46d2-add9-ca94c7cd99b6.json"},
+      {"candidate_id":"58ea9729-5ce6-49e5-a738-21ea43d28e22","shelfmark":"MS. Laud Misc. 185","date_start":1340,"date_end":1360,"origin":"Germany (Mainz Charterhouse?)","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/34e77f61-86c3-49e6-8f17-d6c72c90d444.json"},
+      {"candidate_id":"cc42689c-de2a-46ad-8574-97f0714e1eae","shelfmark":"MS. Laud Misc. 405","date_start":1340,"date_end":1360,"origin":"Germany","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/ce696e6b-23f7-4ddf-ac23-93e0261e17a3.json"},
+      {"candidate_id":"74eb69bf-7942-4b27-bca0-b400ceef84bb","shelfmark":"MS. Broxb. 89.5","date_start":1396,"date_end":1396,"origin":"German, Cologne (?)","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/ee79f234-16d3-45f1-9e07-ebc867247de4.json"},
+      {"candidate_id":"bf8b6ac1-750e-4590-94a8-634c63e2a6bd","shelfmark":"MS. Laud Misc. 443","date_start":1400,"date_end":1410,"origin":"German, probably area of Nuremberg","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/f9874623-2c38-42d3-af0d-c30f8ddcc73e.json"},
+      {"candidate_id":"d8d97696-78cf-4a21-a0d8-4dd1e882aa8a","shelfmark":"MS. Laud Lat. 40","date_start":1400,"date_end":1410,"origin":"Germany","manifest":"https://iiif.bodleian.ox.ac.uk/iiif/manifest/2c1b82ed-a7f6-4b8c-b9bb-b71caa387e5a.json"}
+    ]
+  }
+}
