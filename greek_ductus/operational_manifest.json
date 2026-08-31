@@ -1,0 +1,38 @@
+{
+  "protocol": "2026-08-31.greek-ductus.v1",
+  "status": "FROZEN_BEFORE_FEATURE_EXTRACTION",
+  "selection_note": "Operational replacement after Bodleian IIIF infrastructure failure. Selection uses script family/catalogue provenance, date overlap, reachable IIIF host, and page availability only. No image resemblance criterion.",
+  "control_page_fractions": [0.16,0.30,0.44,0.58,0.72,0.86],
+  "families": {
+    "GREEK": [
+      {"candidate_id":"b349bc3a-7345-4942-afd2-64568ce22f3d","institution":"Biblioteca Medicea Laurenziana","shelfmark":"Plut.28.20","date_start":1301,"date_end":1400,"origin":"not securely localized; Greek; Pinakes: s. XIV in., scribe Makarios","host":"florence-contentdm","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:720940/manifest.json"},
+      {"candidate_id":"cb6afe9e-f384-432a-b2ed-bc8fbe07d9d4","institution":"Biblioteca Medicea Laurenziana","shelfmark":"Plut.28.12","date_start":1301,"date_end":1400,"origin":"not securely localized; Greek 14th century","host":"florence-contentdm","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:643995/manifest.json"},
+      {"candidate_id":"f024e70d-3c8e-4ad6-810a-3af231e8444a","institution":"Universitätsbibliothek Leipzig","shelfmark":"Cod. gr. 35","date_start":1370,"date_end":1375,"origin":"Athens (?) / Italy / Southern Italy; Greek","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000013152/manifest.json"},
+      {"candidate_id":"e4a61040-8310-459e-861d-018e1b23be79","institution":"SLUB Dresden","shelfmark":"Mscr.Dresd.Da.61","date_start":1376,"date_end":1400,"origin":"Euboia (?) / Lesbos (?) / Rhodes (?); Greek-East astronomical/astrological manuscript","host":"dresden","manifest":"https://iiif.slub-dresden.de/iiif/2/347226094/manifest.json"},
+      {"candidate_id":"cd78ea6f-83f5-495d-960c-8f360b2e9e11","institution":"SLUB Dresden","shelfmark":"Mscr.Dresd.Da.47","date_start":1426,"date_end":1450,"origin":"Byzantine Empire; Isocrates","host":"dresden","manifest":"https://iiif.slub-dresden.de/iiif/2/346857929/manifest.json"},
+      {"candidate_id":"148562c7-a5d8-40e7-9781-c7a66655977b","institution":"Bayerische Staatsbibliothek München","shelfmark":"Cod.graec. 256","date_start":1435,"date_end":1455,"origin":"Ferrara; Greek; c.1445","host":"bsb","manifest":"https://api.digitale-sammlungen.de/iiif/presentation/v2/bsb00076424/manifest"}
+    ],
+    "ITALIAN_LATIN": [
+      {"candidate_id":"1f61b4b1-222e-470d-8467-18143690f0dc","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 1118","date_start":1301,"date_end":1325,"origin":"Northern Italy / Bologna (?)","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000009594/manifest.json"},
+      {"candidate_id":"d2020aa6-ffff-4494-acb4-bfa04061d828","institution":"SLUB Dresden","shelfmark":"Mscr.Dresd.Ob.11","date_start":1340,"date_end":1346,"origin":"Tuscany","host":"dresden","manifest":"https://iiif.slub-dresden.de/iiif/2/443104131/manifest.json"},
+      {"candidate_id":"ede4a230-d1f4-494f-bd15-8d41c60b03b7","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 1205","date_start":1401,"date_end":1401,"origin":"Northern Italy / Padua (?)","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000035377/manifest.json"},
+      {"candidate_id":"f93710c7-3078-412d-8119-e92cb23cb8fa","institution":"SLUB Dresden","shelfmark":"Mscr.Dresd.Ob.6","date_start":1430,"date_end":1435,"origin":"Tuscany / Central Italy","host":"dresden","manifest":"https://iiif.slub-dresden.de/iiif/2/443095418/manifest.json"},
+      {"candidate_id":"075e8368-cc27-470d-9745-4a4d8b03381c","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 1089","date_start":1435,"date_end":1440,"origin":"Italy","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000011029/manifest.json"},
+      {"candidate_id":"a0c7212f-844e-4d9b-8698-942d3a8b2f4e","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 917","date_start":1436,"date_end":1437,"origin":"Perugia","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000010962/manifest.json"}
+    ],
+    "GERMAN": [
+      {"candidate_id":"ef67fcd3-50fe-4342-aad0-5ec573540668","institution":"SLUB Dresden","shelfmark":"Mscr.Dresd.M.32","date_start":1342,"date_end":1363,"origin":"Germany / East Central German / Meissen region","host":"dresden","manifest":"https://iiif.slub-dresden.de/iiif/2/272362328/manifest.json"},
+      {"candidate_id":"199c6f1e-a126-4b3f-bd1c-16a4218c48a9","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 1360","date_start":1376,"date_end":1400,"origin":"Germany / Prague","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000004484/manifest.json"},
+      {"candidate_id":"09001f59-83fb-44d1-8147-5144bebc8dbc","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 458","date_start":1390,"date_end":1390,"origin":"Erfurt","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000043431/manifest.json"},
+      {"candidate_id":"27a00b9d-f457-4882-bd65-0a1a06351909","institution":"Bundesverwaltungsgericht Bibliothek / Leipzig IIIF","shelfmark":"MS 4° H 3365-1","date_start":1392,"date_end":1395,"origin":"Erfurt","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000055278/manifest.json"},
+      {"candidate_id":"b9e393c0-24aa-4346-a409-269d9cf41464","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 1539","date_start":1414,"date_end":1420,"origin":"Germany / Erfurt (?)","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000033283/manifest.json"},
+      {"candidate_id":"689b1081-9e09-4ee8-a8df-432df554b6c9","institution":"Universitätsbibliothek Leipzig","shelfmark":"Ms 1368","date_start":1415,"date_end":1430,"origin":"Germany","host":"leipzig","manifest":"https://iiif.ub.uni-leipzig.de/0000010696/manifest.json"}
+    ]
+  },
+  "mandatory_sensitivities": [
+    "report GREEK results with and without Ferrara Cod.graec.256",
+    "report GREEK secure-Byzantine/Greek-East subset separately where provenance supports it",
+    "report leave-host-out/repository diagnostics",
+    "do not interpret repository prediction as script affinity"
+  ]
+}
