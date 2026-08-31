@@ -1,0 +1,9 @@
+{
+  "protocol": "2026-08-31.greek-ductus.v1",
+  "family": "VMS",
+  "manifest": "https://collections.library.yale.edu/manifests/2002046",
+  "selection_rule": "Sample 18 evenly spaced canvas fractions across the Yale IIIF manifest after excluding only non-image/unfetchable canvases. Do not use EVA, Currier, section labels, glyph identities, prior similarity judgments, or hand labels to choose pages. The same image-derived word-like crop detector used on ordinary-script controls is applied to Voynich. Hand/section labels may be joined only after feature extraction for secondary stratified analysis.",
+  "fractions": [0.055,0.110,0.165,0.220,0.275,0.330,0.385,0.440,0.495,0.550,0.605,0.660,0.715,0.770,0.825,0.880,0.935,0.975],
+  "crop_cap_per_page": 90,
+  "primary_aggregate": "single-manuscript robust centroid over all accepted crops; page-level blocks retained for sensitivity analysis only"
+}
