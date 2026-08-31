@@ -44,8 +44,16 @@ def canvases(m:dict[str,Any])->list[dict[str,Any]]:
 
 def image_url(c:dict[str,Any],width:int=1600)->str:
     sid=c.get("service")
+    body=c.get("body")
+    # SLUB Dresden's service IDs are valid IIIF services, but its server rejects
+    # the resized derivative form used by the generic adapter. The canonical
+    # body URL supplied in the manifest is accepted and is therefore used
+    # verbatim. This is acquisition-only; sampling/segmentation is unchanged.
+    if sid and "images.iiif.slub-dresden.de" in sid:
+        if body: return body
+        return sid.rstrip("/")+"/full/full/0/default.jpg"
     if sid: return sid.rstrip("/")+f"/full/{width},/0/default.jpg"
-    u=c["body"]
+    u=body
     if "/full/" in u:
         pre=u.split("/full/")[0]; return pre+f"/full/{width},/0/default.jpg"
     return u
