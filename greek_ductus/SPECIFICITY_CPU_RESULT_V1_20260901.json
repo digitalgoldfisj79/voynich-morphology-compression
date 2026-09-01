@@ -1,0 +1,34 @@
+{
+  "protocol":"2026-09-01.greek-ductus.specificity-v1",
+  "representation":"cpu_stroke_geometry_v1",
+  "hf_job_id":"6a96827621c5aa7c8364aee1",
+  "descriptor_dim":52,
+  "distances":{
+    "GREEK":1.2580838483769545,
+    "LATIN":1.2973830344306148,
+    "special_objects":{
+      "FONTANA_BELLICORUM":3.200310982167197,
+      "FONTANA_SECRETUM":2.2042693413483074,
+      "FOXTON_R15_21":1.2681196874835976,
+      "BSB_GRAEC_201_END":1.450338207278053,
+      "LJS51":1.8822719934268872,
+      "LJS49":1.8193064426991703,
+      "LJS189":2.753828192732524
+    },
+    "special_families":{
+      "BYZ_CIPHER_MIXED":1.450338207278053,
+      "EASTERN_ORDINARY":2.2384977598650613,
+      "FONTANA":1.9166635254128312,
+      "FOXTON_MIXED":1.2681196874835976,
+      "LJS51_SECRET":1.8822719934268872
+    }
+  },
+  "nearest_special":"FOXTON_R15_21",
+  "specificity_margin_special_minus_greek":0.010035839106643074,
+  "nearest_overall":"GREEK",
+  "ordinary_loo_accuracy":0.875,
+  "ordinary_loo_confusion":{"GREEK->GREEK":8,"LATIN->GREEK":2,"LATIN->LATIN":6},
+  "greek_vs_latin_reproduction":{"advantage":0.03929918605366023,"perm_mean":0.0010899196232818185,"perm_sd":0.18361385522410778,"z":0.2080957691538824,"empirical_p_one_sided":0.4208289585520724,"permutations":20000},
+  "decision_cpu":"GREEK_SURVIVES_SPECIALS",
+  "audit_note":"Rare cipher comparators are exemplar-level, not independent manuscript families. No crop-level significance claim is permitted. Greek beats Foxton by only 0.0100 in this representation, so the ordering is a near-tie."
+}
