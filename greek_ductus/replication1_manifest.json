@@ -1,0 +1,31 @@
+{
+  "protocol": "2026-09-01.greek-ductus.replication1",
+  "status": "FROZEN_BEFORE_REPLICATION_PIXEL_EXTRACTION",
+  "host": "florence-contentdm",
+  "date_class": "1301-1400",
+  "control_page_fractions": [0.13, 0.27, 0.41, 0.59, 0.73, 0.87],
+  "vms_manifest": "https://collections.library.yale.edu/manifests/2002046",
+  "vms_fractions": [0.030, 0.085, 0.140, 0.195, 0.250, 0.305, 0.360, 0.415, 0.470, 0.525, 0.580, 0.635, 0.690, 0.745, 0.800, 0.855, 0.910, 0.965],
+  "families": {
+    "GREEK": [
+      {"id":"464869","shelfmark":"Plut.28.13","pages":508,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:464869/manifest.json"},
+      {"id":"667777","shelfmark":"Plut.28.7","pages":372,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:667777/manifest.json"},
+      {"id":"1418539","shelfmark":"Plut.32.33","pages":520,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1418539/manifest.json"},
+      {"id":"1189443","shelfmark":"Plut.74.23","pages":438,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1189443/manifest.json"},
+      {"id":"1131576","shelfmark":"Plut.75.20","pages":532,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1131576/manifest.json"},
+      {"id":"969951","shelfmark":"Plut.81.18","pages":308,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:969951/manifest.json"},
+      {"id":"1161338","shelfmark":"Plut.86.30","pages":432,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1161338/manifest.json"},
+      {"id":"1015270","shelfmark":"Plut.91 sup.5","pages":160,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1015270/manifest.json"}
+    ],
+    "LATIN": [
+      {"id":"42273","shelfmark":"Plut.1 sin.10","pages":660,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:42273/manifest.json"},
+      {"id":"200539","shelfmark":"Plut.2 sin.9","pages":426,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:200539/manifest.json"},
+      {"id":"516525","shelfmark":"Plut.26 sin.9","pages":576,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:516525/manifest.json"},
+      {"id":"457599","shelfmark":"Plut.36 sin.9","pages":380,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:457599/manifest.json"},
+      {"id":"589950","shelfmark":"Plut.41.41","pages":294,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:589950/manifest.json"},
+      {"id":"122410","shelfmark":"Plut.7 sin.8","pages":724,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:122410/manifest.json"},
+      {"id":"961567","shelfmark":"Plut.82.20","pages":140,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:961567/manifest.json"},
+      {"id":"1136954","shelfmark":"Plut.90 sup.139","pages":100,"manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1136954/manifest.json"}
+    ]
+  }
+}
