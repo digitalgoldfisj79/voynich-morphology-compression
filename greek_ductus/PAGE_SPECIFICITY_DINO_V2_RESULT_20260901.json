@@ -1,0 +1,72 @@
+{
+  "protocol": "2026-09-01.page-specificity-v2",
+  "representation": "dinov3_b_cls_page_v2",
+  "model": "facebook/dinov3-vitb16-pretrain-lvd1689m",
+  "revision": "5931719e67bbdb9737e363e781fb0c67687896bc",
+  "n_embeddings": 2589,
+  "ordinary_baseline": {
+    "d_vms_greek": 0.018505752086639404,
+    "d_vms_latin": 0.05215895175933838,
+    "greek_advantage_vs_latin": 0.033653199672698975,
+    "loo_accuracy": 1.0,
+    "loo_confusion": {
+      "GREEK->GREEK": 8,
+      "LATIN->LATIN": 8
+    }
+  },
+  "page_targets_ranked": [
+    {
+      "id": "LJS51_PDF218",
+      "status": "EXACT_PAGE_MIXED",
+      "distance_to_voynich": 0.027266502380371094,
+      "special_minus_greek": 0.00876075029373169,
+      "closer_than_ordinary_greek": false
+    },
+    {
+      "id": "FOXTON_F13",
+      "status": "EXACT_FOLIO_MIXED_SIDE",
+      "distance_to_voynich": 0.03329730033874512,
+      "special_minus_greek": 0.014791548252105713,
+      "closer_than_ordinary_greek": false,
+      "same_codex": {
+        "d_target": 0.03329730033874512,
+        "d_same_codex_ordinary": 0.0683245062828064,
+        "ordinary_minus_target": 0.03502720594406128,
+        "target_closer_than_same_codex_ordinary": true
+      }
+    },
+    {
+      "id": "PALGERM597_F1R",
+      "status": "EXACT",
+      "distance_to_voynich": 0.03336822986602783,
+      "special_minus_greek": 0.014862477779388428,
+      "closer_than_ordinary_greek": false,
+      "same_codex": {
+        "d_target": 0.03336822986602783,
+        "d_same_codex_ordinary": 0.05395352840423584,
+        "ordinary_minus_target": 0.020585298538208008,
+        "target_closer_than_same_codex_ordinary": true
+      }
+    },
+    {
+      "id": "FONTANA_BELLICORUM_42R_49R",
+      "status": "EXACT_PERVASIVE_CIPHER",
+      "distance_to_voynich": 0.04275381565093994,
+      "special_minus_greek": 0.024248063564300537,
+      "closer_than_ordinary_greek": false
+    }
+  ],
+  "precomputed_exact_regions": {
+    "GR201_F176R": {
+      "d_vms_cipher_primary_bottom2": 0.03593453620295106,
+      "d_vms_same_page_plain": 0.016032278424530144,
+      "ordinary_minus_cipher": -0.019902257778420918,
+      "decision": "NO_CIPHER_SPECIFIC_ENRICHMENT"
+    }
+  },
+  "nearest_executable_target": "LJS51_PDF218",
+  "nearest_executable_target_distance": 0.027266502380371094,
+  "nearest_executable_target_vs_greek_margin": 0.00876075029373169,
+  "decision": "ORDINARY_GREEK_REMAINS_NEAREST_AMONG_EXECUTABLE_PAGE_LEVEL_COMPARATORS",
+  "caution": "LJS51 p.218 and Foxton f.13 are mixed pages/folios rather than pixel-isolated cipher-only regions; unresolved archive loci remain excluded until their exact source links are recovered."
+}
