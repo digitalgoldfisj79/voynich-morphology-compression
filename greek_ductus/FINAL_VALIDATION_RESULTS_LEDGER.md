@@ -41,13 +41,26 @@ Interpretation: gross image statistics do not independently generate the previou
 
 Patch yields varied materially across control manuscripts (45–360 accepted patches after deterministic selection); this is a mandatory audit item and remains a limitation to bound.
 
-### Davis-hand sensitivity — NOT YET EXECUTED
+### Stricter extraction sensitivity — CONFIRMS PRIMARY DIRECTION
+
+Predeclared ink gate `[0.03, 0.30]`. Secondary only; cannot rescue the primary.
+
+- `D(VMS,GREEK) = 1.1272332456`
+- `D(VMS,LATIN) = 1.0001294558`
+- Greek advantage `A = -0.1271037898`
+- null SD `= 0.1266356958`
+- `Z = -1.0037743763`
+- exact one-sided `p = 0.8332556333`
+- LOMO accuracy `= 0.625` (10/16)
+- VMS accepted patches = `182`
+
+The stricter gate reproduces the same Latinward direction and approximately the same standardized magnitude as the primary (`Z=-1.02`). This bounds the headline against the preregistered extraction-threshold sensitivity.
+
+Gross-statistics sensitivity remains non-resolving and Latinward (`Z=-0.6172`).
+
+### Davis-hand sensitivity — IN PROGRESS
 
 The initial runner failed to match Yale canvas labels because the Yale manifest labels omit the leading `f` (e.g. `3r`, not `f3r`). This is a label-resolution implementation bug only; it did not affect the primary or gross-statistics result. A corrected mapping rerun is in progress. Mixed-hand `f115r` remains excluded by the frozen rule.
-
-### Stricter extraction sensitivity — IN PROGRESS
-
-Predeclared ink gate `[0.03, 0.30]`. Secondary only; cannot rescue the failed primary result.
 
 ## PRIOR RESULTS RETAINED AS PRIOR EVIDENCE, NOT FINAL CONFIRMATION
 
