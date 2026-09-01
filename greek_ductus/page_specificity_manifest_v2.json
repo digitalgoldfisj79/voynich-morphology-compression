@@ -1,0 +1,116 @@
+{
+  "protocol": "2026-09-01.page-specificity-v2",
+  "frozen_before_similarity": true,
+  "purpose": "Retest special-script specificity using page/folio loci curated in Voynich Archive discussions, avoiding whole-manuscript contamination.",
+  "rules": {
+    "headline_requires_exact_publicly_resolved_locus": true,
+    "mixed_pages_are_labelled_mixed": true,
+    "same_codex_ordinary_controls_used_where_available": true,
+    "one_manuscript_one_vote_in_aggregate": true,
+    "unresolved_hidden_forum_links_are_not_guessed": true,
+    "kyeser_hebrew_scans_excluded": ["5", "6", "528", "529"]
+  },
+  "verified_targets": [
+    {
+      "id": "PALGERM597_F1R",
+      "manuscript": "Heidelberg UB Cod. Pal. germ. 597",
+      "date": "1426",
+      "source_type": "iiif_labels",
+      "manifest": "https://digi.ub.uni-heidelberg.de/diglit/iiif/cpg597/manifest.json",
+      "target_labels": ["1r"],
+      "control_labels": ["5v", "6r", "6v", "7r", "7v"],
+      "target_status": "EXACT",
+      "target_kind": "invented alphabet / cipher key with explanation",
+      "evidence": "Codex states on f.1r that the ABC was newly made by its users; extensive invented-alphabet writing elsewhere."
+    },
+    {
+      "id": "FOXTON_F13",
+      "manuscript": "Cambridge Trinity R.15.21, John de Foxton, Liber Cosmographiae",
+      "date": "1408",
+      "source_type": "iiif_labels",
+      "manifest": "https://mss-cat.trin.cam.ac.uk/Manuscript/R.15.21/manifest.json",
+      "target_labels": ["13r", "13v"],
+      "control_labels": ["12r", "12v", "14r", "14v"],
+      "target_status": "EXACT_FOLIO_MIXED_SIDE",
+      "target_kind": "artificial substitution alphabet embedded in text",
+      "evidence": "Friedman identifies ciphered material on f.13; side is not forced where catalogue/article citation gives folio only, so both sides are retained and labelled mixed."
+    },
+    {
+      "id": "FONTANA_BELLICORUM_42R_49R",
+      "manuscript": "BSB Cod.icon. 242, Giovanni Fontana, Bellicorum instrumentorum liber",
+      "date": "1420-1430",
+      "source_type": "iiif_labels",
+      "manifest": "https://api.digitale-sammlungen.de/iiif/presentation/v2/bsb00013084/manifest",
+      "target_labels": ["42r", "49r"],
+      "control_labels": [],
+      "target_status": "EXACT_PERVASIVE_CIPHER",
+      "target_kind": "Fontana artificial alphabet",
+      "evidence": "Fontana's text is pervasively written in his artificial alphabet; selected folios are fixed loci, not a whole-manuscript centroid."
+    },
+    {
+      "id": "LJS51_PDF218",
+      "manuscript": "Penn LJS 51, Collection of alphabets and encoded correspondence",
+      "date": "15th century",
+      "source_type": "direct_openn_index",
+      "target_url": "https://openn.library.upenn.edu/Data/0001/ljs51/data/web/0084_0217_web.jpg",
+      "control_urls": [],
+      "target_status": "EXACT_PAGE_MIXED",
+      "target_kind": "encoded correspondence plus Arabic plaintext",
+      "evidence": "Voynich Ninja discussion explicitly analyses PDF page 218 and notes seven coded lines alongside Arabic plaintext. This whole-page target is retained as MIXED because the archive discussion does not expose stable pixel coordinates."
+    },
+    {
+      "id": "GR201_F176R",
+      "manuscript": "BSB Cod.graec. 201",
+      "date": "1267 manuscript; ciphered closing material on f.176r",
+      "source_type": "precomputed_exact_region",
+      "target_status": "EXACT_REGION",
+      "target_kind": "Byzantine cryptographic closing epigrams",
+      "evidence": "Already preregistered and run: bottom two detected line clusters on BSB image 401 are the primary proxy for the last two cryptographic epigrams.",
+      "precomputed_result_file": "GR201_CIPHERLINE_RESULT_V1_20260901.json"
+    }
+  ],
+  "archive_loci_not_scored_until_link_resolved": [
+    {
+      "id": "KYESER_SCANS_333_335",
+      "reference": "Konrad Kyeser Bellifortis discussion",
+      "exact_locus": "scans 333 and 335",
+      "status": "EXACT_SCAN_NUMBERS_BUT_HIDDEN_SOURCE_LINK",
+      "note": "Do not substitute another Bellifortis copy. Scans 5/6 and 528/529 from another copy are excluded because they were identified as Hebrew."
+    },
+    {
+      "id": "SPANISH_ACA_79_58_79_59",
+      "reference": "Barcelona, Archivo de la Corona de Aragon, Diversos, Sastago, 193 (Lio B), nos. 79/58 and 79/59",
+      "exact_locus": "the two archival cipher documents themselves",
+      "status": "EXACT_ARCHIVAL_ITEMS_BUT_HIDDEN_DIGITAL_LINK",
+      "note": "Forum screenshots show the qo/4O-like sign; do not use a surrogate image."
+    },
+    {
+      "id": "ITALIAN_CHARM_ARABIC_SIGNS",
+      "reference": "DG97EEB Voynich Ninja post 29 Jan 2026",
+      "exact_locus": "linked mid-15th-century Italian charm pages",
+      "status": "HIDDEN_SHELFMARK_AND_LINK",
+      "note": "Forum screenshots and discussion identify sleep/love/barrenness charms and Arabic-derived signs, but hidden outbound link prevents defensible reconstruction of shelfmark here."
+    },
+    {
+      "id": "MUNICH_MAGIC_72V_74V",
+      "reference": "DG97EEB Voynich Ninja post 10 Feb 2026",
+      "exact_locus": "ff.72v-74v",
+      "status": "EXACT_FOLIOS_HIDDEN_SHELFMARK",
+      "note": "German/Latin 15th-century Munich magic manuscript; same sign set. Shelfmark must be recovered before scoring."
+    },
+    {
+      "id": "PALGERM597_OTHER_CIPHER_PAGES",
+      "reference": "Voynich discussions of Cod. Pal. germ. 597",
+      "exact_locus": "ciphertext surrounding Cisiojanus and later cipher pages",
+      "status": "SECONDARY_TO_F1R_PRIMARY",
+      "note": "f.1r is used as the clean externally documented invented-alphabet locus for v2."
+    },
+    {
+      "id": "BOLOGNA_GR3632_F14V",
+      "reference": "Bologna BUB Cod. gr. 3632",
+      "exact_locus": "f.14v symbol table",
+      "status": "EXACT_FOLIO_DIGITAL_IMAGE_NOT_RESOLVED",
+      "note": "Potential abbreviation/symbol key; user noted no direct VMS overlap. Keep as secondary until a stable image endpoint is resolved."
+    }
+  ]
+}
