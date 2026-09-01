@@ -1,0 +1,20 @@
+source_id,arm,environment,evidence_family,title,url,source_type,quality,validation_state,notes
+SRC001,E1,control,copying_corrections,Correcting Icelandic Manuscripts in the Second Half of the Fourteenth Century,https://doi.org/10.63092/scis.75.44545,scholarly_article,quantified manuscript corpus,fetch_pending,22 originals; correction typology
+SRC002,E1,control,copying_corrections,Scribal Correction and Literary Craft 1375-1510,https://www.cambridge.org/core/books/scribal-correction-and-literary-craft/DE27499C1167B3997A06B87930C90F15,scholarly_book,major monograph,fetch_pending,composition/copying confound
+SRC003,E1,control,copying_corrections,The Significance of Scribal Corrections in CUL MS Dd.4.24,https://doi.org/10.2307/25094375,scholarly_article,manuscript case study,fetch_pending,Canterbury Tales
+SRC004,E1,control,error_dataset,An Annotated Dataset of Errors in Premodern Greek,https://doi.org/10.18653/v1/2025.findings-naacl.401,research_paper,real-error annotated dataset,fetch_pending,text-only calibration
+SRC005,E1,control,document_dataset,Nuremberg Letterbooks multi-transcription dataset,https://arxiv.org/html/2411.07138v1,research_paper,open early-fifteenth-century dataset,fetch_pending,potential composition control
+SRC006,E2,Voynich,production_workflow,How Many Glyphs and How Many Scribes,https://repository.upenn.edu/items/5db6a3b2-e18d-4cf7-bfd4-ba8c0c347597,scholarly_article,primary Davis analysis,fetch_pending,hand assignments
+SRC007,E2,Voynich,codicology,Voynich Codicology,https://manuscriptroadtrip.wordpress.com/2025/01/19/voynich-codicology/,author_scholarly_blog,Lisa Fagin Davis direct account,fetch_pending,production order and hands
+SRC008,E4,Veneto,Greek_access,Greek Manuscripts in Padova,https://www.research.unipd.it/retrieve/e14fb26d-5c49-3de1-e053-1705fe0ac030/Giacomelli%2C%20Greek%20Manuscripts%20in%20Padova.pdf,scholarly_chapter,specialist direct catalogue study,fetch_pending,primary window needs extraction
+SRC009,E4,Veneto,technical_cipher,Fine Technology Dialogue in Fontana's Bellicorum,https://edizionicafoscari.it/media/pdf/article/venezia-arti/2024/1/art-10.30687-VA-2385-2720-2024-01-003.pdf,scholarly_article,peer scholarly with registry citations,fetch_pending,Padua degree and eastern links
+SRC010,E4,Veneto,balneology,Le terme dei Colli Euganei,https://mostre.cab.unipd.it/medicamenta/it/38/le-terme-dei-colli-euganei,university_exhibition,University of Padua curated,fetch_pending,Montagnana and Savonarola
+SRC011,E4,Veneto,herbal_imagery,Medicine and Humanism in Late Medieval Italy,https://doi.org/10.4324/9781315276915,scholarly_book,monograph on Carrara Herbal,fetch_pending,origin separate from manufacture
+SRC012,E4,Siena,hospital_pharmacy,Sienese Hospitals Within and Beyond the City Walls,https://muse.jhu.edu/pub/306/monograph/book/109183,scholarly_book,modern monograph,fetch_pending,1400-1600
+SRC013,E4,Siena,technical_drawing,Mariano Taccola and His Book De Ingeneis,https://doi.org/10.2307/1859096,scholarly_article,document-based study,fetch_pending,1433 Sigismund context
+SRC014,E4,Siena,Greek_access,Francesco Filelfo biography,https://doi.org/10.1017/cbo9780511803048.022,scholarly_chapter,reference biography,fetch_pending,Siena 1434-38
+SRC015,E4,German,technical_drawing,Konrad Kyeser Bellifortis,https://www.loc.gov/item/2021668178/,repository_catalogue,Library of Congress primary catalogue,fetch_pending,medicine plus technical arts
+SRC016,E4,German,balneology,Felix Hemmerli Tractatus de balneis,https://pubmed.ncbi.nlm.nih.gov/8333014/,scholarly_article,indexed history of medicine,fetch_pending,circa 1450 boundary
+SRC017,E4,German,medical_pharmacy,German medical miscellany circa 1452-53 Augsburg,https://dpul.princeton.edu/medieval_manuscripts/catalog/dc8s45qm25g,repository_catalogue,primary catalogue,fetch_pending,near-window not strict
+SRC018,E6,Upper_Rhine,commercial_workshop,Diebold Lauber workshop manuscript list,https://digi.ub.uni-heidelberg.de/bpd/glanzlichter/oberdeutsche/lauber/lauberliste.html,repository_catalogue,manuscript-level list,fetch_pending,includes medical-astronomical calendar
+

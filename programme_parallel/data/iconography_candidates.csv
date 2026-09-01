@@ -1,0 +1,10 @@
+image_id,object_title,shelfmark_folio,date_start,date_end,geography,genre,image_url,catalogue_url,hard_filter_state,blind_code_state,notes
+ICO001,Bamberg Apocalypse New Jerusalem,Bamberg Staatsbibliothek Msc.Bibl.140 f55r,990,1010,German_lands,Apocalypse,,https://www.deutsche-digitale-bibliothek.de/item/TUALJFSQ3WAZYHK45PXULTWEMRUF3HB4,include,pending,
+ICO002,Trinity Apocalypse Heavenly Jerusalem,Trinity College Cambridge R.16.2,1255,1260,Other_Latin_West,Apocalypse,,https://digital.lib.buffalo.edu/items/show/29455,include,pending,
+ICO003,Trier Apocalypse New Jerusalem,Trier Stadtbibliothek Cod.31 f72r,800,825,German_lands,Apocalypse,,https://www.deutsche-digitale-bibliothek.de/item/SXGDL5WSMGHG3GYM753RYPZATEUXLNLB,include,pending,
+ICO004,Liber Floridus Apocalypse cycle,BnF Latin 8865,1200,1300,Other_Latin_West,Apocalypse,,http://purl.flvc.org/fsu/fd/FSU_migr_etd-0767,include_pending_catalogue,pending,
+ICO005,Cosmas Indicopleustes Christian Topography,Vatican Vat.gr.699,800,900,Byzantine,cosmological_architecture,https://digi.vatlib.it/mss/edition/MSS_Vat.gr.699,https://bibleacrossnations.rarebook-ubfc.fr/?page_id=7261,include_pending_folio,pending,
+ICO006,Federigo da Venezia Apocalypse commentary,manuscript unspecified,1390,1410,Venetian_mainland,Apocalypse,,https://collections.museumofthebible.org/artifacts/20902-federigo-da-venezia-commentary-on-the-apocalypse,exclude_if_unillustrated,pending,illustration status unresolved
+ICO007,Morgan Apocalypse New Jerusalem,Morgan M.484 f113r,1470,1480,Other_Latin_West,Apocalypse,,https://ica.themorgan.org/manuscript/page/75/110800,exclude_post1450,pending,hard negative control only
+ICO008,Rolevinck Heavenly Jerusalem,Fitzwilliam fol.17r,1475,1500,German_lands,sacred_city_diagram,,https://data.fitzmuseum.cam.ac.uk/id/image/media-3799044268,exclude_post1450,pending,hard negative control only
+

@@ -1,0 +1,7 @@
+calibrator_id,manuscript_or_corpus,date_range,region,class,ground_truth_basis,image_access,transcription_access,source_ids,eligibility_state,notes
+CAL001,22 Icelandic original manuscripts,1350-1400,Iceland,copied_text,scholarly correction census,unknown,unknown,SRC001,pending,need manuscript-level rows and copy/composition classification
+CAL002,BnF lat.17098 Saint-Etienne Troyes cartulary,1200-1400,France,copied_text,acts copied from originals,digitized_pending,transcription_pending,,pending,1946 confirmed corrections reported
+CAL003,CUL Dd.4.24 Canterbury Tales,1400-1450,England,copied_text,textual tradition and physical corrections,digitized_pending,transcription_available_possible,SRC003,pending,
+CAL004,Premodern Greek real-error dataset,various,Greek_tradition,copied_text,scholarly annotated real errors,no,yes,SRC004,pending,text-only detector calibration
+CAL005,Nuremberg Letterbooks,1400-1450,Southern_Germany,composition_control,administrative production context,yes,yes,SRC005,pending,verify whether entries copied from drafts
+

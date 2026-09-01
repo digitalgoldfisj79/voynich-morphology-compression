@@ -1,0 +1,11 @@
+edge_id,source_person,target_type,target_name,relation,date_start,date_end,evidence_state,source_ids,notes
+EDG001,PER008,person,Prosdocimo de Beldomandi,attended astrology lectures,1417,1423,source_candidate,,alongside Toscanelli
+EDG002,PER001,institution,University of Padua,degree in arts and medicine,1418,1421,source_candidate,SRC009,
+EDG003,PER002,institution,University of Padua,taught astronomy,1422,1428,source_candidate,,
+EDG004,PER004,institution,University of Siena,taught Greek/humanities,1434,1438,source_candidate,SRC014,
+EDG005,PER005,person,Emperor Sigismund,patron/familiaris,1432,1433,source_candidate,SRC013,
+EDG006,PER011,city,Venice,compiled machine book,1424,1424,source_candidate,,
+EDG007,PER009,person,Francesco Barbaro,teacher/translation patronage,1410,1420,source_candidate,,
+EDG008,PER003,institution,University of Padua,professor practical medicine,1434,1440,source_candidate,,
+EDG009,PER010,institution,University of Siena,taught medicine,1417,1417,source_candidate,,
+

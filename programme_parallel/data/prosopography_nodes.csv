@@ -1,0 +1,16 @@
+person_id,name,window_presence,environments,domain_1,domain_2,additional_domains,qualification_state,source_ids,notes
+PER001,Giovanni Fontana,1390s-1455,Venice;Padua,medicine,technical_arts,artificial_writing,candidate_qualifies,SRC009,documentary edge validation pending
+PER002,Prosdocimo de Beldomandi,1400-1428,Padua,medicine,astronomy_cosmography,music,candidate_qualifies,,Padua registry and works
+PER003,Michele Savonarola,1407-1440 Padua,Padua;Ferrara,medicine,book_production,pharmacy;balneology,candidate_qualifies,SRC010,domain evidence to validate
+PER004,Francesco Filelfo,1434-1438 Siena,Siena;Venice;Constantinople,greek_manuscripts,book_production,teaching,candidate_qualifies,SRC014,Greek books brought from Constantinople
+PER005,Mariano Taccola,1419-1450,Siena,technical_arts,book_production,cosmography_possible,candidate_qualifies,SRC013,second domain requires documentary validation
+PER006,Konrad Kyeser,1400-1405+,Eichstatt;Bohemia;Germany,medicine,technical_arts,astrology,candidate_qualifies,SRC015,
+PER007,Johannes Hartlieb,1430-1450,Bavaria;Italy,medicine,book_production,herbal;court,candidate_qualifies,,Italian study location unresolved
+PER008,Nicholas of Cusa,1417-1450,Padua;Germany;Constantinople,astronomy_cosmography,greek_manuscripts,german_travel,candidate_qualifies,,documented Padua lecture network
+PER009,Guarino Veronese,1403-1450,Constantinople;Verona;Venice;Ferrara,greek_manuscripts,book_production,teaching,candidate_qualifies,,
+PER010,Ugo Benzi,1400-1439,Siena;Pavia;Bologna;Padua;Ferrara,medicine,book_production,teaching,candidate_qualifies,,authored medical commentaries
+PER011,Konrad Gruter,1402-1424,Ferrara;Venice;Lucca,technical_arts,german_travel,book_production,candidate_qualifies,,machine book made Venice 1424
+PER012,Francesco Barbaro,1410s-1450,Venice;Padua,greek_manuscripts,book_production,patronage,candidate_qualifies,,student/collector edge validation pending
+PER013,Bartolo di Tura,window uncertain,Siena,medicine,book_holding,,insufficient_domains,,private library is not automatically book production
+PER014,Felix Hemmerli,c.1450,Upper Rhine,book_production,,balneology,insufficient_domains,SRC016,balneology not one of frozen qualifying domains
+

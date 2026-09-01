@@ -1,0 +1,7 @@
+unit_id,milieu,environment,date_range,document_type,herbals,materia_medica,pharmacy_receptaria,balneology,astronomy_astrology,cosmography,greek_books,technical_books,cipher_alphabets,source_ids,validation_state,notes
+MIL001,humanist_private_library,Padua,pre-1405,Carrara collection,,,,,,,,,,SRC011,source_pending,Carrara Herbal remains one luxury document not whole collection
+MIL002,hospital_xenon,Siena,1400-1450,Santa Maria della Scala records,,,,,,,,,,SRC012,source_pending,apothecary evidence distinct from later library index
+MIL003,humanist_private_library,Siena,1400-1450,Bartolo di Tura library inventory,,,,,,,,,,,source_missing,prior work says expected medical books; exact inventory required
+MIL004,commercial_workshop,Upper Rhine,1430-1450,Lauber output catalogue,,,,,,,,,,SRC018,source_pending,workshop output not owner inventory
+MIL005,court_technical_household,Venice,1424,Konrad Gruter machine-book commission,,,,,,,,,,,source_pending,documentary unit definition under review
+
