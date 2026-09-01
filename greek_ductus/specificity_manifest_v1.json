@@ -1,0 +1,39 @@
+{
+  "protocol":"2026-09-01.greek-ductus.specificity-v1",
+  "status":"FROZEN_BEFORE_SPECIAL_COMPARATOR_SIMILARITY",
+  "control_page_fractions":[0.13,0.27,0.41,0.59,0.73,0.87],
+  "special_page_fractions":[0.10,0.26,0.42,0.58,0.74,0.90],
+  "vms_manifest":"https://collections.library.yale.edu/manifests/2002046",
+  "vms_fractions":[0.030,0.085,0.140,0.195,0.250,0.305,0.360,0.415,0.470,0.525,0.580,0.635,0.690,0.745,0.800,0.855,0.910,0.965],
+  "ordinary":{
+    "GREEK":[
+      {"shelfmark":"Plut.28.13","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:464869/manifest.json"},
+      {"shelfmark":"Plut.28.7","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:667777/manifest.json"},
+      {"shelfmark":"Plut.32.33","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1418539/manifest.json"},
+      {"shelfmark":"Plut.74.23","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1189443/manifest.json"},
+      {"shelfmark":"Plut.75.20","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1131576/manifest.json"},
+      {"shelfmark":"Plut.81.18","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:969951/manifest.json"},
+      {"shelfmark":"Plut.86.30","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1161338/manifest.json"},
+      {"shelfmark":"Plut.91 sup.5","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1015270/manifest.json"}
+    ],
+    "LATIN":[
+      {"shelfmark":"Plut.1 sin.10","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:42273/manifest.json"},
+      {"shelfmark":"Plut.2 sin.9","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:200539/manifest.json"},
+      {"shelfmark":"Plut.26 sin.9","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:516525/manifest.json"},
+      {"shelfmark":"Plut.36 sin.9","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:457599/manifest.json"},
+      {"shelfmark":"Plut.41.41","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:589950/manifest.json"},
+      {"shelfmark":"Plut.7 sin.8","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:122410/manifest.json"},
+      {"shelfmark":"Plut.82.20","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:961567/manifest.json"},
+      {"shelfmark":"Plut.90 sup.139","manifest":"https://cdm21059.contentdm.oclc.org/iiif/plutei:1136954/manifest.json"}
+    ]
+  },
+  "special":[
+    {"family":"FONTANA","object":"FONTANA_BELLICORUM","source_type":"iiif","manifest":"https://api.digitale-sammlungen.de/iiif/presentation/v2/bsb00013084/manifest","note":"cipher pervasive"},
+    {"family":"FONTANA","object":"FONTANA_SECRETUM","source_type":"iiif","manifest":"https://gallica.bnf.fr/iiif/ark:/12148/btv1b10023795x/manifest.json","note":"cipher pervasive"},
+    {"family":"FOXTON_MIXED","object":"FOXTON_R15_21","source_type":"iiif","manifest":"https://mss-cat.trin.cam.ac.uk/Manuscript/R.15.21/manifest.json","note":"cipher is sparse within ordinary Latin; secondary comparator"},
+    {"family":"BYZ_CIPHER_MIXED","object":"BSB_GRAEC_201_END","source_type":"iiif_last6","manifest":"https://api.digitale-sammlungen.de/iiif/presentation/v2/bsb00018791/manifest","note":"last six canvases fixed because concluding cryptographic material is documented"},
+    {"family":"LJS51_SECRET","object":"LJS51","source_type":"openn","html":"https://openn.library.upenn.edu/Data/0001/html/ljs51.html","note":"c.150 secret alphabets plus Arabic transcriptions; mixed pages"},
+    {"family":"EASTERN_ORDINARY","object":"LJS49","source_type":"openn","html":"https://openn.library.upenn.edu/Data/0001/html/ljs49.html","note":"Persian/Arabic ordinary-script control, Persia 1411"},
+    {"family":"EASTERN_ORDINARY","object":"LJS189","source_type":"openn","html":"https://openn.library.upenn.edu/Data/0001/html/ljs189.html","note":"ordinary Persian-script control, 14th century"}
+  ]
+}
