@@ -1,0 +1,82 @@
+{
+  "protocol": "2026-09-01.gr201-cipherline-followup-v1",
+  "representation": "dinov3_b_cls_within_gr201",
+  "model": "facebook/dinov3-vitb16-pretrain-lvd1689m",
+  "revision": "5931719e67bbdb9737e363e781fb0c67687896bc",
+  "historical_target": "BSB Cod.graec.201 f.176r / BSB image 401; last two closing epigrams documented as cryptographic",
+  "runner_commit": "b42ef60396fbdac6e18021b5adc0ada2ab7f5c68",
+  "hf_job": "6a968beb0718b0f6d890bdc2",
+  "line_definition": {
+    "factor": 0.7,
+    "n_lines": 6,
+    "line_sizes": [18, 26, 19, 10, 12, 5],
+    "primary": "bottom two detected line clusters",
+    "sensitivities": ["bottom one detected line cluster", "bottom three detected line clusters"]
+  },
+  "base_controls": {
+    "d_vms_adjacent_bsb_399_400": 0.018655392589955966,
+    "d_vms_ordinary_greek_8ms": 0.018426926965116053,
+    "ordinary_greek_manuscripts": {
+      "Plut.28.13": 0.021407568982223624,
+      "Plut.28.7": 0.02081035056671965,
+      "Plut.32.33": 0.014519638366773058,
+      "Plut.74.23": 0.03440899156727428,
+      "Plut.75.20": 0.039224298511524536,
+      "Plut.81.18": 0.01912628374429237,
+      "Plut.86.30": 0.058583225950863405,
+      "Plut.91 sup.5": 0.03953116908670573
+    }
+  },
+  "tests": {
+    "strict_bottom1": {
+      "cipher_line_ids": [5],
+      "n_cipher_crops": 5,
+      "n_plain_crops": 85,
+      "d_vms_cipher": 0.14154423960157592,
+      "d_vms_same_page_plain": 0.014791805899866284,
+      "plain_minus_cipher": -0.12675243370170963,
+      "d_vms_adjacent_bsb_399_400": 0.018655392589955966,
+      "d_vms_ordinary_greek_8ms": 0.018426926965116053,
+      "line_subset_exact_n": 6,
+      "line_subset_rank_desc": 6,
+      "line_subset_fraction_ge": 1.0,
+      "null_delta_min": -0.12675243370170963,
+      "null_delta_median": -0.015489773752872193,
+      "null_delta_max": -0.0071793937127920815
+    },
+    "primary_bottom2": {
+      "cipher_line_ids": [4, 5],
+      "n_cipher_crops": 17,
+      "n_plain_crops": 73,
+      "d_vms_cipher": 0.03593453620295106,
+      "d_vms_same_page_plain": 0.016032278424530144,
+      "plain_minus_cipher": -0.019902257778420918,
+      "d_vms_adjacent_bsb_399_400": 0.018655392589955966,
+      "d_vms_ordinary_greek_8ms": 0.018426926965116053,
+      "line_subset_exact_n": 15,
+      "line_subset_rank_desc": 13,
+      "line_subset_fraction_ge": 0.8666666666666667,
+      "null_delta_min": -0.029172090967641506,
+      "null_delta_median": -0.007852612033484196,
+      "null_delta_max": 0.00408404221402936
+    },
+    "broad_bottom3": {
+      "cipher_line_ids": [3, 4, 5],
+      "n_cipher_crops": 27,
+      "n_plain_crops": 63,
+      "d_vms_cipher": 0.02547118243013169,
+      "d_vms_same_page_plain": 0.01625623158227174,
+      "plain_minus_cipher": -0.009214950847859948,
+      "d_vms_adjacent_bsb_399_400": 0.018655392589955966,
+      "d_vms_ordinary_greek_8ms": 0.018426926965116053,
+      "line_subset_exact_n": 20,
+      "line_subset_rank_desc": 19,
+      "line_subset_fraction_ge": 0.95,
+      "null_delta_min": -0.0122863956947743,
+      "null_delta_median": 0.0,
+      "null_delta_max": 0.0122863956947743
+    }
+  },
+  "decision": "NO_CIPHER_SPECIFIC_ENRICHMENT",
+  "interpretation_guardrail": "This within-manuscript test does not support a cipher-specific Voynich affinity in BSB Cod.graec.201. The earlier broad-ending DINO proximity is therefore better attributed to ordinary Greek/page-environment signal or mixed-region averaging, not to the documented cryptographic epigrams themselves."
+}
