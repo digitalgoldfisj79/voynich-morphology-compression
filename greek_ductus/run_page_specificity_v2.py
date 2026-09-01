@@ -36,6 +36,35 @@ def normfolio(x):
     if m:return str(int(m.group(1)))+m.group(2)
     return s
 
+def canonical_image_urls(c):
+    """Acquisition-only fallbacks. Scientific target/page selection is unchanged."""
+    urls=[]
+    try:
+        r=c['images'][0]['resource']; direct=r.get('@id') or r.get('id'); svc=r.get('service') or {}; sid=svc.get('@id') or svc.get('id')
+        if sid:
+            urls.extend([sid.rstrip('/')+'/full/1600,/0/default.jpg',sid.rstrip('/')+'/full/full/0/default.jpg'])
+        if direct: urls.append(direct)
+    except Exception:
+        pass
+    try:
+        u=ec.image_url(c)
+        if u: urls.insert(0,u)
+    except Exception:
+        pass
+    out=[]
+    for u in urls:
+        if u and u not in out: out.append(u)
+    return out
+
+def fetch_canvas_image(c,oid,lab):
+    last=None
+    for u in canonical_image_urls(c):
+        try:
+            return base.fetch_img(u)
+        except Exception as e:
+            last=e; print(json.dumps({'event':'image_fallback','object':oid,'folio':lab,'url':u,'error':repr(e)}),flush=True)
+    raise last or RuntimeError(f'{oid} {lab}: no image URL')
+
 def exact_iiif_pages(manifest,oid,labels):
     cs=ec.canvases(base.get_json(manifest)); want=[normfolio(x) for x in labels]; found={}
     for i,c in enumerate(cs):
@@ -45,7 +74,7 @@ def exact_iiif_pages(manifest,oid,labels):
     if missing: raise RuntimeError(f'{oid}: missing labels {missing}; found keys sample={list(found)}')
     out=[]
     for lab in want:
-        i,c,raw=found[lab]; im=base.fetch_img(ec.image_url(c)); cc=base.page_crops_from_image(im,oid,i)
+        i,c,raw=found[lab]; im=fetch_canvas_image(c,oid,lab); cc=base.page_crops_from_image(im,oid,i)
         for _,m in cc: m['folio']=lab; m['raw_label']=raw
         out.extend(cc); print(json.dumps({'event':'exact_page','object':oid,'folio':lab,'index':i,'crops':len(cc)}),flush=True)
     return out
