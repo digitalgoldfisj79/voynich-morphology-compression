@@ -38,6 +38,19 @@ def page_features(im):
     return [sf.descriptor(ec.norm_crop(bw,b)) for b in bs]
 
 
+def retry_call(fn, *args, label='io', attempts=7):
+    last=None
+    for k in range(attempts):
+        try:
+            return fn(*args)
+        except Exception as e:
+            last=e
+            print(json.dumps({'event':'retry','label':label,'attempt':k+1,'error':repr(e)[:240]}),flush=True)
+            if k+1 < attempts:
+                time.sleep(min(20.0, 1.5*(2**k)))
+    raise last
+
+
 def analyze(records,qraw):
     C=np.vstack([r['summary'] for r in records])
     m,d=scale(C)
@@ -78,27 +91,29 @@ def main():
     t=time.time(); recs=[]; counts=[]
     for fam,rr in spec['families'].items():
         for r in rr:
-            cs=ec.canvases(ec.get_json(r['manifest']))
+            cs=ec.canvases(retry_call(ec.get_json, r['manifest'], label=f"manifest:{r['shelfmark']}"))
             inds=fixed_indices(len(cs),spec['control_page_fractions'])
             ff=[]
             for pi in inds:
-                im=ec.fetch_image(ec.image_url(cs[pi]))
+                url=ec.image_url(cs[pi])
+                im=retry_call(ec.fetch_image, url, label=f"image:{r['shelfmark']}:{pi}")
                 f=page_features(im); ff.extend(f)
                 counts.append({'family':fam,'shelfmark':r['shelfmark'],'page':pi,'crops':len(f)})
                 print(json.dumps({'event':'rep_page','family':fam,'shelfmark':r['shelfmark'],'page':pi,'crops':len(f),'elapsed_s':round(time.time()-t,1)}),flush=True)
             recs.append({'family':fam,'shelfmark':r['shelfmark'],'summary':summ(ff),'n_crops':len(ff)})
             print(json.dumps({'event':'rep_ms','family':fam,'shelfmark':r['shelfmark'],'crops':len(ff)}),flush=True)
 
-    vm=ec.get_json(spec['vms_manifest']); vcs=ec.canvases(vm)
+    vm=retry_call(ec.get_json, spec['vms_manifest'], label='manifest:VMS'); vcs=ec.canvases(vm)
     vf=[]; vp=[]
     for pi in fixed_indices(len(vcs),spec['vms_fractions']):
-        im=ec.fetch_image(ec.image_url(vcs[pi])); f=page_features(im); vf.extend(f)
+        url=ec.image_url(vcs[pi])
+        im=retry_call(ec.fetch_image, url, label=f'image:VMS:{pi}')
+        f=page_features(im); vf.extend(f)
         vp.append({'page':pi,'crops':len(f),'summary':summ(f) if f else None})
         print(json.dumps({'event':'rep_vms_page','page':pi,'crops':len(f),'elapsed_s':round(time.time()-t,1)}),flush=True)
 
     q=summ(vf)
     result=analyze(recs,q)
-    # page-level descriptive spread using the control scaler/centroids from the headline fit
     m=result.pop('scaler_center'); d=result.pop('scaler_scale'); cen=result.pop('centroids')
     pages=[]
     for p in vp:
